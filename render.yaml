@@ -1,0 +1,42 @@
+# Render Blueprint — deploy the RAG Study Chatbot as a free web service.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# After pushing this repo to GitHub, go to:
+#   Render Dashboard -> New -> Blueprint -> select this repo
+# Render will read this file and create the service for you.
+#
+# IMPORTANT (free-tier truth):
+#   * Render's free tier sleeps after ~15 min idle and has an EPHEMERAL
+#     filesystem — uploaded user notes are wiped on every restart/deploy.
+#   * The app handles this gracefully: on boot it re-ingests whatever is
+#     bundled in /pdf, so the default knowledge base always comes back.
+#   * To keep user uploads permanently, attach a Disk (see DEPLOYMENT.md)
+#     and mount it at /app/data and /app/pdf. Disks are ~$1/mo on Render.
+
+services:
+  - type: web
+    name: rag-study-chatbot
+    runtime: docker
+    plan: free
+    region: oregon           # change to frankfurt/singapore if closer to you
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: GOOGLE_API_KEY
+        sync: false          # set this secret in the Render dashboard
+      - key: GEMINI_MODEL
+        value: gemini-1.5-flash
+      - key: EMBEDDING_MODEL_NAME
+        value: sentence-transformers/all-MiniLM-L6-v2
+      - key: TOP_K
+        value: "5"
+      - key: KEEP_ALIVE_ENABLED
+        value: "true"
+      # KEEP_ALIVE_URL is set automatically from RENDER_EXTERNAL_URL at runtime
+# Optional persistent disk — uncomment to keep user uploads across restarts.
+# (Disks require a paid plan on Render; comment back out for purely-free.)
+#    disks:
+#      - name: studybot-data
+#        mountPath: /app/data
+#        sizeGB: 1

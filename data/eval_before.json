@@ -1,0 +1,341 @@
+[
+  {
+    "question": "What is a class?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.8956,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "14.2 Classes 523 14.2 Classes CONCEPT: A class is code that specifies the fields and methods for a particular type of object. Now, let\u2019s dis"
+      },
+      {
+        "score": 0.9339,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "potential classes is as follows: address Mercedes BMW model car name cars Porsche customer sales tax estimated labor charges service quote e"
+      },
+      {
+        "score": 0.9917,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "14.2 Classes 525 Creating a Class, Step by Step The general format that we will use to write a class definition in pseudocode is as follows:"
+      }
+    ]
+  },
+  {
+    "question": "What are relationships between classes?",
+    "category": "section",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.8486,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "When an \u201cis a\u201d relationship exists between objects, it means that the specialized object has all of the characteristics of the general objec"
+      },
+      {
+        "score": 1.0376,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "Review Questions 561 11. A set of standard diagrams for graphically depicting object-oriented systems is provided by __________. a. the Unif"
+      },
+      {
+        "score": 1.0535,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "cerned with in order to solve the problem, items that represent objects instead of classes, and items that represent simple values that can "
+      }
+    ]
+  },
+  {
+    "question": "What is dynamic cast used for?",
+    "category": "precision_trap",
+    "expect_answer": false,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "What is a structure in C++?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.6137,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "C++ MASTERY NOTES Page 3 1. STRUCTURES 1.1 \u2014 The Why: What Is a Structure and Why Does It Exist? In C, struct was born to solve a fundamenta"
+      },
+      {
+        "score": 0.9077,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "1.2 \u2014 Basic Syntax struct Point { float x, y, z; // data members void print() const { // member function // 'this' is Point const* here prin"
+      },
+      {
+        "score": 0.9146,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "p->f(); // C (vtable: C::f) // p->g(); // ERROR: A* has no g() B* bp = new C(); bp->g(); // Bg (C doesn't override g, so B::g) delete p; del"
+      }
+    ]
+  },
+  {
+    "question": "What is operator overloading?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.7209,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "C++ MASTERY NOTES Page 12 3. OPERATOR OVERLOADING 3.1 \u2014 The Why: Natural Syntax for User Types Operator overloading lets you write v1 + v2 i"
+      },
+      {
+        "score": 0.7912,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "Worse: if you overload && or ||, you LOSE short-circuit evaluation \u2014 both operands are always evaluated, breaking lazy evaluation logic. Non"
+      },
+      {
+        "score": 0.8909,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "3.5 \u2014 Dynamic Memory in Operator Overloading (Deep Copy Assignment) class DynArr { int* data; int size; public: DynArr(int n): size(n), data"
+      }
+    ]
+  },
+  {
+    "question": "What is the diamond problem in C++?",
+    "category": "section",
+    "expect_answer": true,
+    "retrieved": 1,
+    "top_chunks": [
+      {
+        "score": 1.0413,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "C++ MASTERY NOTES Page 22 Dry Run 2: Diamond Problem \u2014 Ambiguity Without Virtual struct A { int x=10; }; struct B : A {}; struct C : A {}; s"
+      }
+    ]
+  },
+  {
+    "question": "What is the rule of five?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "What is a vtable?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 2,
+    "top_chunks": [
+      {
+        "score": 1.0948,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "C++ MASTERY NOTES Page 23 6. POLYMORPHISM 6.1 \u2014 The Why: One Interface, Many Behaviours Polymorphism means many forms. In C++ we distinguish"
+      },
+      {
+        "score": 1.0974,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "void** __vptr; // hidden \u2014 points to Animal::vtable // vtable = { &Animal::speak, &Animal::~Animal } public: virtual void speak() { ... } vi"
+      }
+    ]
+  },
+  {
+    "question": "What is polymorphism in C++?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.6112,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "C++ MASTERY NOTES Page 23 6. POLYMORPHISM 6.1 \u2014 The Why: One Interface, Many Behaviours Polymorphism means many forms. In C++ we distinguish"
+      },
+      {
+        "score": 0.7438,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "14.6 Polymorphism 555 14.6 Polymorphism CONCEPT: Polymorphism allows you to create methods with the same name in different classes (that are"
+      },
+      {
+        "score": 0.9152,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "public: Dog(std::string n, int t) : Animal(n), tricks(t) { std::cout << \"Dog \" << tricks << \"\\n\"; } ~Dog() { std::cout << \"~Dog\\n\"; } void s"
+      }
+    ]
+  },
+  {
+    "question": "What is the difference between composition and aggregation?",
+    "category": "section",
+    "expect_answer": true,
+    "retrieved": 1,
+    "top_chunks": [
+      {
+        "score": 0.9607,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "C++ MASTERY NOTES Page 16 4. COMPOSITION & AGGREGATION 4.1 \u2014 The Why: Has-A Relationships Inheritance models Is-A. Composition and Aggregati"
+      }
+    ]
+  },
+  {
+    "question": "What is move semantics?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 3,
+    "top_chunks": [
+      {
+        "score": 0.9582,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "// Using a after std::move is legal but dangerous! // TRAP: std::move on const does NOT move! const MyBuf x(50); MyBuf y = std::move(x); // "
+      },
+      {
+        "score": 1.0006,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "C++ MASTERY NOTES Page 28 o.data = nullptr; // leave source empty o.size = 0; } // 6. Move Assignment \u2014 STEAL resources MyBuf& operator=(MyB"
+      },
+      {
+        "score": 1.061,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "the module does not actually move anything, but displays instructions indicating all of the disc moves to make. Module moveDiscs(Integer num"
+      }
+    ]
+  },
+  {
+    "question": "What is shallow copy versus deep copy?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 2,
+    "top_chunks": [
+      {
+        "score": 1.0271,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "C++ MASTERY NOTES Page 32 int* data; public: Shallow(int v) { data=new int(v); } ~Shallow() { delete data; std::cout<<\"~S\\n\"; } // NO copy c"
+      },
+      {
+        "score": 1.129,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "Full Rule of 5 Implementation class MyBuf { int* data; int size; public: // 1. Constructor MyBuf(int n): size(n), data(new int[n]{}) {} // 2"
+      }
+    ]
+  },
+  {
+    "question": "What is a POD type?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 1,
+    "top_chunks": [
+      {
+        "score": 1.1417,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "structure alignment. Consider: struct Padded { char a; // 1 byte fi offset 0 // 3 bytes padding inserted here int b; // 4 bytes fi offset 4 "
+      }
+    ]
+  },
+  {
+    "question": "How do constructors and destructors work in inheritance?",
+    "category": "section",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.6857,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "// What the COMPILER actually sees: // void setX(MyClass* const this, int v) { this->x = v; } class MyClass { int x; public: void setX(int v"
+      },
+      {
+        "score": 0.7915,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "p->f(); // C (vtable: C::f) // p->g(); // ERROR: A* has no g() B* bp = new C(); bp->g(); // Bg (C doesn't override g, so B::g) delete p; del"
+      },
+      {
+        "score": 0.8724,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "public: Dog(std::string n, int t) : Animal(n), tricks(t) { std::cout << \"Dog \" << tricks << \"\\n\"; } ~Dog() { std::cout << \"~Dog\\n\"; } void s"
+      }
+    ]
+  },
+  {
+    "question": "What is static dispatch versus dynamic dispatch?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "What is the capital of France?",
+    "category": "refusal",
+    "expect_answer": false,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "Who won the FIFA World Cup in 2022?",
+    "category": "refusal",
+    "expect_answer": false,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "Write me a poem about spring flowers",
+    "category": "offtopic",
+    "expect_answer": false,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "What is the cookie cutter metaphor in object-oriented programming?",
+    "category": "gaddis_specific",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.6896,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "524 Chapter 14 Object-Oriented Programming Figure 14-4 The cookie cutter metaphor Cookie cutter Cookies So, a class is not an object, but it"
+      },
+      {
+        "score": 0.8823,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "wishes, he or she can build several identical houses from the same blueprint.\u201d Think of this as a metaphor for classes and objects. Does the"
+      },
+      {
+        "score": 0.9635,
+        "source": "Gaddis _StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "house described by the blueprint. If we so desire, we can build several identical houses from the same blueprint. Each house is a separate i"
+      }
+    ]
+  },
+  {
+    "question": "What is RTTI and run-time type identification?",
+    "category": "precision_trap",
+    "expect_answer": false,
+    "retrieved": 0,
+    "top_chunks": []
+  }
+]

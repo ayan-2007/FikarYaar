@@ -1,0 +1,72 @@
+[project]
+name = "rag-study-chatbot"
+version = "1.0.0"
+description = "A study-only RAG chatbot that answers strictly from your uploaded notes (PDF/DOCX/MD/TXT)."
+readme = "README.md"
+requires-python = ">=3.11,<3.13"
+authors = [{ name = "RAG Study Chatbot" }]
+license = { text = "MIT" }
+
+dependencies = [
+    # --- Web framework ---
+    "fastapi>=0.111",
+    "uvicorn[standard]>=0.30",
+    "python-multipart>=0.0.9",        # for file uploads
+    "sse-starlette>=2.1",             # server-sent events streaming
+    # --- Config / utilities ---
+    "pydantic>=2.7",
+    "pydantic-settings>=2.3",
+    "python-dotenv>=1.0",
+    # --- Document parsing (multi-format) ---
+    "pypdf>=4.3",                     # PDF
+    "pdfplumber>=0.11",               # better PDF text extraction fallback
+    "python-docx>=1.1",               # DOCX
+    "python-pptx>=0.6",               # PPTX (PowerPoint slides)
+    "unstructured>=0.15",             # DOCX/MD/TXT robust loader
+    "markdown>=3.6",                  # markdown note parsing
+    # --- LangChain ecosystem ---
+    "langchain>=0.3",
+    "langchain-core>=0.3",
+    "langchain-community>=0.3",
+    "langchain-text-splitters>=0.3",
+    "langchain-groq>=0.2",            # Groq
+    "langgraph>=0.2",                 # agent orchestration
+    "langgraph-checkpoint>=0.2",
+    # --- Embeddings + vector store ---
+    "sentence-transformers>=3.0",
+    "chromadb>=0.5",
+    "langchain-chroma>=0.1.4",
+    "langchain-huggingface>=0.1.0",
+    # --- Observability ---
+    "loguru>=0.7",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.23",
+    "httpx>=0.27",
+    "ruff>=0.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+# ------------------------------------------------------------
+# Ruff: lightweight linter/formatter config (beginner friendly)
+# ------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W", "UP"]
+ignore = ["E501"]  # line length handled by formatter
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]

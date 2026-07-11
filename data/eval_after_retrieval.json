@@ -1,0 +1,409 @@
+[
+  {
+    "question": "What is a class?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.8857,
+        "source": "Gaddis__StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "that a particular type of Insect object may have. class The mosquito object is an mosquito instance of the Insect class. It object has the f"
+      },
+      {
+        "score": 0.8956,
+        "source": "Gaddis__StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": "14.2 Classes 523",
+        "preview": "14.2 Classes 523 14.2 Classes CONCEPT: A class is code that specifies the fields and methods for a particular type of object. Now, let\u2019s dis"
+      },
+      {
+        "score": 0.9189,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "an Instructor class could be created to hold the instructor-related data, and a TextBook class could be created to hold the textbook-related"
+      }
+    ]
+  },
+  {
+    "question": "What are relationships between classes?",
+    "category": "section",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.7828,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "34 cout << \"Publisher: \" << publisher << endl; } 35 }; 36 #endif The Course class is shown next. Notice the Course class has an Instructor o"
+      },
+      {
+        "score": 0.7828,
+        "source": "tony_gaddis_c__.pdf",
+        "section": null,
+        "preview": "34 cout << \"Publisher: \" << publisher << endl; } 35 }; 36 #endif The Course class is shown next. Notice the Course class has an Instructor o"
+      },
+      {
+        "score": 0.8725,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "In real life, objects are frequently made of other objects. A house, for example, is made of door objects, window objects, wall objects, and"
+      }
+    ]
+  },
+  {
+    "question": "What is dynamic cast used for?",
+    "category": "precision_trap",
+    "expect_answer": false,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "What is a structure in C++?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.6786,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "650 Chapter 11 Structured Data Each of the variables defined in this example is a separate instance of the PayRoll struc- ture and contains "
+      },
+      {
+        "score": 0.6786,
+        "source": "tony_gaddis_c__.pdf",
+        "section": null,
+        "preview": "650 Chapter 11 Structured Data Each of the variables defined in this example is a separate instance of the PayRoll struc- ture and contains "
+      },
+      {
+        "score": 0.7028,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": "1.1 \u2014 The Why: What Is a Structure and Why Does It Exist?",
+        "preview": "1.1 \u2014 The Why: What Is a Structure and Why Does It Exist? In C, struct was born to solve a fundamental problem: how do you group logically r"
+      }
+    ]
+  },
+  {
+    "question": "What is operator overloading?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.6459,
+        "source": "tony_gaddis_c++.pdf",
+        "section": "14.5 Operator Overloading 869",
+        "preview": "14.5 Operator Overloading 869 14.5 Operator Overloading CONCEPT: C++ allows you to redefine how standard operators work when used with class"
+      },
+      {
+        "score": 0.6459,
+        "source": "tony_gaddis_c__.pdf",
+        "section": "14.5 Operator Overloading 869",
+        "preview": "14.5 Operator Overloading 869 14.5 Operator Overloading CONCEPT: C++ allows you to redefine how standard operators work when used with class"
+      },
+      {
+        "score": 0.6789,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "32. When the arithmetic assignment operator is overloaded, the object at the _________ side of the operator is passed as an argument. 33. A("
+      }
+    ]
+  },
+  {
+    "question": "What is the diamond problem in C++?",
+    "category": "section",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 1.0212,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "1300 Chapter 21 Binary Trees Program 21-3 1 // This program builds a binary tree with 5 nodes. 2 // The SearchNode function is demonstrated."
+      },
+      {
+        "score": 1.0212,
+        "source": "tony_gaddis_c__.pdf",
+        "section": null,
+        "preview": "1300 Chapter 21 Binary Trees Program 21-3 1 // This program builds a binary tree with 5 nodes. 2 // The SearchNode function is demonstrated."
+      },
+      {
+        "score": 1.0339,
+        "source": "C___How_to_Program_9th_ediiton.pdf",
+        "section": null,
+        "preview": "956 Chapter23 OtherTopics inheritedviaclassbasic_ostream).Suchasituationwouldbeambiguousandwouldresult inacompilationerror,becausethecompile"
+      }
+    ]
+  },
+  {
+    "question": "What is the rule of five?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "What is a vtable?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 3,
+    "top_chunks": [
+      {
+        "score": 1.0329,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": "6.1 \u2014 The Why: One Interface, Many Behaviours",
+        "preview": "6.1 \u2014 The Why: One Interface, Many Behaviours Polymorphism means many forms. In C++ we distinguish static polymorphism (compile-time: overlo"
+      },
+      {
+        "score": 1.0377,
+        "source": "C___How_to_Program_9th_ediiton.pdf",
+        "section": null,
+        "preview": "Self-ReviewExercises 559 Section12.7(Optional)Polymorphism,VirtualFunctionsandDynamicBinding \u201cUndertheHood\u201d \u2022 Dynamicbindingrequiresthatatru"
+      },
+      {
+        "score": 1.0637,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "public: virtual void speak() { ... } virtual ~Animal() { ... } }; class Dog : public Animal { // Dog::vtable = { &Dog::speak, &Dog::~Dog } /"
+      }
+    ]
+  },
+  {
+    "question": "What is polymorphism in C++?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.6942,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": "6.1 \u2014 The Why: One Interface, Many Behaviours",
+        "preview": "6.1 \u2014 The Why: One Interface, Many Behaviours Polymorphism means many forms. In C++ we distinguish static polymorphism (compile-time: overlo"
+      },
+      {
+        "score": 0.7438,
+        "source": "Gaddis__StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": "14.6 Polymorphism 555",
+        "preview": "14.6 Polymorphism 555 14.6 Polymorphism CONCEPT: Polymorphism allows you to create methods with the same name in different classes (that are"
+      },
+      {
+        "score": 0.754,
+        "source": "C___How_to_Program_9th_ediiton.pdf",
+        "section": null,
+        "preview": "polymorphism, virtual functions and dynamic binding internally. This will give you a solidunderstandingofhowthesecapabilitiesreallywork.More"
+      }
+    ]
+  },
+  {
+    "question": "What is the difference between composition and aggregation?",
+    "category": "section",
+    "expect_answer": true,
+    "retrieved": 4,
+    "top_chunks": [
+      {
+        "score": 0.8448,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "34 cout << \"Publisher: \" << publisher << endl; } 35 }; 36 #endif The Course class is shown next. Notice the Course class has an Instructor o"
+      },
+      {
+        "score": 0.8448,
+        "source": "tony_gaddis_c__.pdf",
+        "section": null,
+        "preview": "34 cout << \"Publisher: \" << publisher << endl; } 35 }; 36 #endif The Course class is shown next. Notice the Course class has an Instructor o"
+      },
+      {
+        "score": 1.0832,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "In real life, objects are frequently made of other objects. A house, for example, is made of door objects, window objects, wall objects, and"
+      }
+    ]
+  },
+  {
+    "question": "What is move semantics?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.7816,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "When to Implement Move Semantics in a Class Anytime you write a class that contains a pointer or a reference to an outside piece of data, yo"
+      },
+      {
+        "score": 0.7816,
+        "source": "tony_gaddis_c__.pdf",
+        "section": null,
+        "preview": "When to Implement Move Semantics in a Class Anytime you write a class that contains a pointer or a reference to an outside piece of data, yo"
+      },
+      {
+        "score": 0.8987,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": "7.3 \u2014 noexcept and Move Semantics",
+        "preview": "7.3 \u2014 noexcept and Move Semantics Standard containers (like std::vector) will only use move operations during reallocation if the move const"
+      }
+    ]
+  },
+  {
+    "question": "What is shallow copy versus deep copy?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 3,
+    "top_chunks": [
+      {
+        "score": 0.9624,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": "8.2 \u2014 Cascading Effects: Shallow Copy Chain Disaster",
+        "preview": "8.2 \u2014 Cascading Effects: Shallow Copy Chain Disaster This is a common multi-object scenario in exams. Three objects share the same heap bloc"
+      },
+      {
+        "score": 0.9819,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "int* data; public: Shallow(int v) { data=new int(v); } ~Shallow() { delete data; std::cout<<\"~S\\n\"; } // NO copy constructor \u2014 compiler gene"
+      },
+      {
+        "score": 1.0669,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "Full Rule of 5 Implementation class MyBuf { int* data; int size; public: // 1. Constructor MyBuf(int n): size(n), data(new int[n]{}) {} // 2"
+      }
+    ]
+  },
+  {
+    "question": "What is a POD type?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 2,
+    "top_chunks": [
+      {
+        "score": 0.7921,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "type. PODs can be safely copied with memcpy, serialised to disk byte-for-byte, and are guaranteed to have the same layout as their C equival"
+      },
+      {
+        "score": 1.063,
+        "source": "CPP_Mastery_Notes.pdf",
+        "section": null,
+        "preview": "structure alignment. Consider: struct Padded { char a; // 1 byte fi offset 0 // 3 bytes padding inserted here int b; // 4 bytes fi offset 4 "
+      }
+    ]
+  },
+  {
+    "question": "How do constructors and destructors work in inheritance?",
+    "category": "section",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.61,
+        "source": "tony_gaddis_c++.pdf",
+        "section": "13.9 Destructors 799",
+        "preview": "13.9 Destructors 799 13.9 Destructors CONCEPT: A destructor is a member function that is automatically called when an object is destroyed. D"
+      },
+      {
+        "score": 0.61,
+        "source": "tony_gaddis_c__.pdf",
+        "section": "13.9 Destructors 799",
+        "preview": "13.9 Destructors 799 13.9 Destructors CONCEPT: A destructor is a member function that is automatically called when an object is destroyed. D"
+      },
+      {
+        "score": 0.635,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "destructor? 13. If a class object is dynamically allocated in memory, does its constructor execute? If so, when?"
+      }
+    ]
+  },
+  {
+    "question": "What is static dispatch versus dynamic dispatch?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.8918,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "as linked lists. In this section, you will see examples of both static and dynamic stacks. Stack Operations A stack has two primary operatio"
+      },
+      {
+        "score": 0.8918,
+        "source": "tony_gaddis_c__.pdf",
+        "section": null,
+        "preview": "as linked lists. In this section, you will see examples of both static and dynamic stacks. Stack Operations A stack has two primary operatio"
+      },
+      {
+        "score": 1.0389,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "jobs submitted by users of the system, while the printer services those jobs one at a time. Communications software also uses queues to hold"
+      }
+    ]
+  },
+  {
+    "question": "What is the capital of France?",
+    "category": "refusal",
+    "expect_answer": false,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "Who won the FIFA World Cup in 2022?",
+    "category": "refusal",
+    "expect_answer": false,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "Write me a poem about spring flowers",
+    "category": "offtopic",
+    "expect_answer": false,
+    "retrieved": 0,
+    "top_chunks": []
+  },
+  {
+    "question": "What is the cookie cutter metaphor in object-oriented programming?",
+    "category": "gaddis_specific",
+    "expect_answer": true,
+    "retrieved": 5,
+    "top_chunks": [
+      {
+        "score": 0.6896,
+        "source": "Gaddis__StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": null,
+        "preview": "524 Chapter 14 Object-Oriented Programming Figure 14-4 The cookie cutter metaphor Cookie cutter Cookies So, a class is not an object, but it"
+      },
+      {
+        "score": 0.7968,
+        "source": "Gaddis__StartingOutWithProgrammingLogicAndDesign3rdEd.pdf",
+        "section": "14.6 In this chapter, we use the metaphor of a cookie cutter and cookies that are",
+        "preview": "Think of this as a metaphor for classes and objects. Does the blueprint represent a class, or does it represent an object? 14.6 In this chap"
+      },
+      {
+        "score": 0.8309,
+        "source": "tony_gaddis_c++.pdf",
+        "section": null,
+        "preview": "the new format. This results in additional work for programmers and a greater opportunity for bugs to appear in the code. This problem has h"
+      }
+    ]
+  },
+  {
+    "question": "What is RTTI and run-time type identification?",
+    "category": "factual",
+    "expect_answer": true,
+    "retrieved": 1,
+    "top_chunks": [
+      {
+        "score": 1.0881,
+        "source": "C___How_to_Program_9th_ediiton.pdf",
+        "section": null,
+        "preview": "and Runtime Type Information with Downcasting, dynamic_cast, typeid and type_info RecallfromtheproblemstatementatthebeginningofSection12.6th"
+      }
+    ]
+  }
+]
