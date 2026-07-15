@@ -51,3 +51,13 @@ class UploadResponse(BaseModel):
     status: str
     files: List[str]
     chunks_added: int
+
+
+class QuizStartRequest(BaseModel):
+    topic: str = Field(..., min_length=1, max_length=200)
+
+
+class QuizAnswerRequest(BaseModel):
+    session_id: str
+    question_num: int
+    answer: str = Field(..., min_length=1, max_length=5000)

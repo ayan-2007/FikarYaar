@@ -1,13 +1,9 @@
 """
-The LangGraph RAG pipeline.
+The LangGraph RAG pipeline using Agentic nodes (Darban, Mehakkim, Ustad).
 
 Flow:
-  rewrite  ->  classify  ->  {OFFTOPIC: refuse_offtopic}
-                              {STUDY:   retrieve -> grade -> {used_notes: generate}
-                                                                 {!used:    refuse_no_notes}}
-
-This single graph encodes all the guardrails. Each node is a plain function in
-app/rag/nodes/, so beginners can read the whole flow top-to-bottom.
+  rewrite  ->  classify  ->  {GREETING/OFFTOPIC/QUIZ_REQUEST: refuse_offtopic}
+                             {STUDY: retrieve -> grade -> generate (Ustad)}
 """
 from __future__ import annotations
 
@@ -19,7 +15,7 @@ from app.core.logging import get_logger
 from app.rag.nodes.classify import classify_intent_node
 from app.rag.nodes.generate import generate_node
 from app.rag.nodes.grade import grade_documents_node
-from app.rag.nodes.refuse import refuse_no_notes_node, refuse_offtopic_node
+from app.rag.nodes.refuse import refuse_offtopic_node
 from app.rag.nodes.rewrite import rewrite_question_node
 from app.rag.nodes.retrieve import retrieve_node
 from app.rag.state import GraphState
@@ -32,11 +28,13 @@ log = get_logger(__name__)
 
 
 def _route_after_classify(state: GraphState) -> Literal["retrieve", "refuse_offtopic"]:
-    return "refuse_offtopic" if state.get("intent") == "OFFTOPIC" else "retrieve"
+    return "retrieve" if state.get("intent") == "STUDY" else "refuse_offtopic"
 
 
-def _route_after_grade(state: GraphState) -> Literal["generate", "refuse_no_notes"]:
-    return "generate" if state.get("used_notes") else "refuse_no_notes"
+def _route_after_grade(state: GraphState) -> Literal["generate"]:
+    # Always route to Ustad (generate) so no query goes unanswered.
+    # Ustad will print a warning and answer from general knowledge if fallback_needed is True.
+    return "generate"
 
 
 # ---------------------------------------------------------------------------
@@ -52,7 +50,6 @@ def build_graph():
     g.add_node("grade", grade_documents_node)
     g.add_node("generate", generate_node)
     g.add_node("refuse_offtopic", refuse_offtopic_node)
-    g.add_node("refuse_no_notes", refuse_no_notes_node)
 
     g.set_entry_point("rewrite")
     g.add_edge("rewrite", "classify")
@@ -65,14 +62,13 @@ def build_graph():
     g.add_conditional_edges(
         "grade",
         _route_after_grade,
-        {"generate": "generate", "refuse_no_notes": "refuse_no_notes"},
+        {"generate": "generate"},
     )
     g.add_edge("generate", END)
     g.add_edge("refuse_offtopic", END)
-    g.add_edge("refuse_no_notes", END)
 
     compiled = g.compile()
-    log.info("RAG graph compiled")
+    log.info("Agentic RAG graph compiled")
     return compiled
 
 
@@ -99,7 +95,7 @@ def format_history(messages: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def ask(question: str, history: list[dict] | None = None) -> dict:
+async def ask(question: str, history: list[dict] | None = None) -> dict:
     """
     Convenience entry point: run the full graph for a single question.
 
@@ -110,6 +106,7 @@ def ask(question: str, history: list[dict] | None = None) -> dict:
         "question": question,
         "original_question": question,
         "history": format_history(history),
+        "chat_history": history,  # Raw history list for Ustad
     }
-    result = get_graph().invoke(state)
+    result = await get_graph().ainvoke(state)
     return result

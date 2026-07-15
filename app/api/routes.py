@@ -30,6 +30,8 @@ from app.api.schemas import (
     IngestResponse,
     SourceInfo,
     UploadResponse,
+    QuizStartRequest,
+    QuizAnswerRequest,
 )
 from app.core.config import settings
 from app.core.logging import get_logger
@@ -86,7 +88,7 @@ async def health():
 async def chat(req: ChatRequest):
     """Run the full RAG graph and return the answer + sources."""
     history = [{"role": m.role, "content": m.content} for m in req.history]
-    result = ask(req.question, history)
+    result = await ask(req.question, history)
     return ChatResponse(
         answer=result.get("answer", ""),
         sources=[SourceInfo(**s) for s in result.get("sources", [])],
@@ -110,8 +112,7 @@ async def _stream_answer(question: str, history: list[dict]):
     yield "event: status\ndata: " + json.dumps({"step": "thinking"}) + "\n\n"
     await asyncio.sleep(0)
 
-    loop = asyncio.get_event_loop()
-    result = await loop.run_in_executor(None, ask, question, history)
+    result = await ask(question, history)
 
     # 2) send sources first so the UI can render them above the answer
     sources = result.get("sources", [])
@@ -250,3 +251,67 @@ async def wipe_all():
         return {"status": "wiped"}
     except Exception as e:  # noqa: BLE001
         return {"status": "error", "error": str(e)}
+
+
+# ---------------------------------------------------------------------------
+# Quiz (Imtehaan)
+# ---------------------------------------------------------------------------
+@router.post("/quiz/start")
+async def quiz_start(req: QuizStartRequest):
+    """
+    Start a quiz session. Retrieves relevant study chunks for the topic
+    and forwards them to Agent 4 (Imtehaan).
+    """
+    from app.rag.vectorstore import retrieve_with_threshold
+    from app.agents.imtehaan import start_quiz
+    from fastapi import HTTPException
+    from app.core.logging import get_logger
+    
+    log = get_logger(__name__)
+    
+    log.info(f"Quiz start request: topic={req.topic}")
+    
+    # Check if we have any study notes
+    if collection_count() == 0:
+        log.warning("Quiz start failed: empty knowledge base")
+        raise HTTPException(
+            status_code=400,
+            detail="Your knowledge base is empty! Please upload study notes (PDF, DOCX, TXT) first."
+        )
+    
+    # Retrieve top 8 candidates for the topic
+    log.info(f"Retrieving chunks for topic: {req.topic}")
+    scored_docs = retrieve_with_threshold(req.topic, candidate_k=15, final_k=8)
+    log.info(f"Retrieved {len(scored_docs)} chunks")
+    
+    chunks = [
+        {
+            "source": doc.metadata.get("source_name", "notes"),
+            "text": doc.page_content
+        }
+        for doc, _ in scored_docs
+    ]
+    
+    log.info(f"Starting quiz with {len(chunks)} chunks")
+    res = await start_quiz(req.topic, chunks)
+    log.info(f"Quiz start result: {res}")
+    if "error" in res:
+        log.error(f"Quiz start error: {res['error']}")
+        raise HTTPException(status_code=500, detail=res["error"])
+        
+    return res
+
+
+@router.post("/quiz/answer")
+async def quiz_answer(req: QuizAnswerRequest):
+    """
+    Evaluate a quiz answer using Agent 4 (Imtehaan).
+    """
+    from app.agents.imtehaan import evaluate_answer
+    from fastapi import HTTPException
+    
+    res = await evaluate_answer(req.session_id, req.question_num, req.answer)
+    if "error" in res:
+        raise HTTPException(status_code=400, detail=res["error"])
+        
+    return res

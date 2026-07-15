@@ -1,0 +1,274 @@
+[
+  {
+    "question": "What is a class?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**A Class is a Description of an Object**\n\nThink of it like a blueprint for a house. The blueprint describes the design, layout, and features of the house, but it is not the actual house itself. Similarly, a class is a description of an object, specifying its attributes and behaviors. It is a template or a pattern that defines the characteristics and properties of an object.\n\n**Key Takeaway:** \nA class is a blueprint or a template that defines the characteristics and properties of an object, and",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "an Instructor class could be created to hold the instructor-related data, and a TextBook class could be created to hold the textbook-related data. Instances of these classes could",
+        "section": "",
+        "score": 0.9188739657402039
+      }
+    ]
+  },
+  {
+    "question": "What are relationships between classes?",
+    "category": "section",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**Relationships Between Classes**\n\nThere are two fundamental relationships between classes: **object aggregation** and **inheritance**.\n\n**Object Aggregation**:\nObject aggregation is a relationship where one class (the **aggregate**) contains one or more instances of another class (the **component**). Think of it like a **house** being made up of **walls**, **windows**, and **doors**. The house is the aggregate, and the walls, windows, and doors are the components.\n\nIn the provided chunks, we se",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "34 cout << \"Publisher: \" << publisher << endl; } 35 }; 36 #endif The Course class is shown next. Notice the Course class has an Instructor object and a TextBook object as member va",
+        "section": "",
+        "score": 0.782799482345581
+      }
+    ]
+  },
+  {
+    "question": "What is dynamic cast used for?",
+    "category": "precision_trap",
+    "expect_answer": false,
+    "used_notes": true,
+    "answer": "**Dynamic Cast: A Powerful Tool for Runtime Type Identification**\n\nDynamic cast is a type of cast in C++ that allows you to check if an object is of a certain type at runtime. It is used to perform **runtime type identification** (RTTI).\n\nThink of it like trying to identify a person in a crowd. You might ask them questions like \"Are you wearing a blue shirt?\" or \"Do you have a hat on?\" to narrow down the possibilities. Similarly, dynamic cast allows you to ask questions about an object's type at",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "Destructors and Dynamically Allocated Class Objects If a class object has been dynamically allocated by the new operator, its memory should be released when the object is no longer",
+        "section": "",
+        "score": 1.2031196355819702
+      }
+    ]
+  },
+  {
+    "question": "What is a structure in C++?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**A Structure in C++**\n\nA structure in C++ is a collection of variables of different data types that are stored together in memory. Think of it like a **folder** that holds multiple **files** (variables) with different types of data.\n\nHere's a breakdown of the key points:\n\n* A structure declaration establishes the **tag** (or name) of the structure and a list of items that are members.\n* Each member of a structure is a variable that exists in memory and contains its own data.\n* Structures can be",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "650 Chapter 11 Structured Data Each of the variables defined in this example is a separate instance of the PayRoll struc- ture and contains its own members. An instance of a struct",
+        "section": "",
+        "score": 0.6786184310913086
+      }
+    ]
+  },
+  {
+    "question": "What is operator overloading?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**Operator Overloading: A Powerful Tool for Class Objects**\n\nOperator overloading is a feature in C++ that allows you to redefine how standard operators work when used with class objects [\u00b9]. Think of it like assigning a new meaning to a familiar symbol, such as the \"+\" operator, to perform a specialized operation on class objects.\n\nFor example, consider a class named `Date` that holds the month, day, and year. You can overload the \"+\" operator to add a number of days to the date, making it more",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "14.5 Operator Overloading 869 14.5 Operator Overloading CONCEPT: C++ allows you to redefine how standard operators work when used with class objects. C++ provides many operators to",
+        "section": "14.5 Operator Overloading 869",
+        "score": 0.6458519697189331
+      }
+    ]
+  },
+  {
+    "question": "What is the diamond problem in C++?",
+    "category": "section",
+    "expect_answer": true,
+    "used_notes": false,
+    "answer": "> \u26a0\ufe0f **This topic wasn't found in your uploaded notes.**\n> Answering from general knowledge. Please verify with your course material or upload relevant notes.\n\n**The Diamond Problem in C++**\n=====================================\n\nThe diamond problem is a well-known issue in C++ that arises when multiple inheritance is used. It occurs when two base classes have a common base class, and the derived class inherits from both of these base classes.\n\n**The Problem**\n---------------\n\nConsider the follo",
+    "sources": []
+  },
+  {
+    "question": "What is the rule of five?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": false,
+    "answer": "\u26a0\ufe0f **This topic wasn't found in your uploaded notes.**\nAnswering from general knowledge. Please verify with your course material or upload relevant notes.\n\n**The Rule of Five: A Fundamental Concept in Fikaryaar**\n\nIn the realm of Fikaryaar, the Rule of Five is a fundamental principle that guides the creation and understanding of complex systems, patterns, and relationships. It is a powerful tool for analysis, problem-solving, and decision-making.\n\n**What is the Rule of Five?**\n\nThe Rule of Five ",
+    "sources": []
+  },
+  {
+    "question": "What is a vtable?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**Understanding the Concept of a vtable**\n\nA vtable, short for virtual table, is a crucial component in C++ that enables polymorphism. Think of it like a phonebook where each class has its own entry, listing the addresses of its virtual functions. When a class inherits from another class, the vtable of the derived class is a merged version of the vtables of its base classes.\n\n**How a vtable works:**\n\n* Each class has a unique vtable that contains the addresses of its virtual functions.\n* When a ",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "1008 Chapter 15 Inheritance, Polymorphism, and Virtual Functions int a; protected: double b; public: long c; }; class Second : protected First { private: int d; protected: double e",
+        "section": "15.19 Examine the following class declarations:",
+        "score": 1.2362719774246216
+      }
+    ]
+  },
+  {
+    "question": "What is polymorphism in C++?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**Polymorphism in C++**\n=======================\n\nPolymorphism is the ability of an object to take on multiple forms. Think of it like a person who can speak multiple languages - they can communicate in different ways depending on the situation. In C++, polymorphism allows objects of different classes to be treated as objects of a common superclass.\n\n**Types of Polymorphism**\n-------------------------\n\nThere are two types of polymorphism in C++:\n\n* **Compile-time polymorphism**: This is achieved ",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "Inheritance, Polymorphism, 15 and Virtual Functions TOPICS 15.1 What Is Inheritance? 15.5 Class Hierarchies 15.2 Protected Members and Class 15.6 Polymorphism and Virtual Member Ac",
+        "section": "15.1 What Is Inheritance? 15.5 Class Hierarchies",
+        "score": 0.8180674314498901
+      }
+    ]
+  },
+  {
+    "question": "What is the difference between composition and aggregation?",
+    "category": "section",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "Let's break down the key points related to your question.\n\n**Composition vs. Aggregation:**\n\nThink of it like building a house. Composition is like having all the materials (wood, nails, paint, etc.) to build the house, and you're using them to create the entire house. Aggregation is like having a house that's made of many other objects, like doors, windows, and walls, which are all separate entities but come together to form the house.\n\nIn programming, composition is when an object contains one",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "34 cout << \"Publisher: \" << publisher << endl; } 35 }; 36 #endif The Course class is shown next. Notice the Course class has an Instructor object and a TextBook object as member va",
+        "section": "",
+        "score": 0.8447731733322144
+      }
+    ]
+  },
+  {
+    "question": "What is move semantics?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**Move Semantics: A Key to Efficient Code \ud83d\udca1**\n\nMove semantics is a feature in C++ that allows for the efficient transfer of resources from one object to another, without making copies of the data. Think of it like **packing a suitcase**: when you move from one place to another, you don't make a copy of your entire life; you simply transfer the essential items from one suitcase to another.\n\n**Key Aspects of Move Semantics:**\n\n*   **Rvalue References**: Move semantics use rvalue references, which ",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "When to Implement Move Semantics in a Class Anytime you write a class that contains a pointer or a reference to an outside piece of data, you should include a copy constructor, a m",
+        "section": "",
+        "score": 0.7816426753997803
+      }
+    ]
+  },
+  {
+    "question": "What is shallow copy versus deep copy?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**Shallow Copy vs Deep Copy**\n\nA shallow copy creates a new object and then (to the extent possible) inserts references into it to the original elements by using their names or other handles. This means that if you modify the original object, the copied object will also be modified. Think of it like making a photocopy of a photograph. If you scratch the original photograph, the photocopy will also have the scratch.\n\nOn the other hand, a deep copy creates a new object and then, recursively, inser",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "8. How can the compiler determine if a constructor is a copy constructor? 9. Describe a situation where memberwise assignment is not desirable. 10. Why must the parameter of a copy",
+        "section": "",
+        "score": 1.248777985572815
+      }
+    ]
+  },
+  {
+    "question": "What is a POD type?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**POD Type** [\u00b9] filename.pdf \u2014 \"A POD type is a Plain Old Data type.\"\n\nThink of it like a simple data structure, like a house with just the basic rooms. A POD type is a basic data type that doesn't have any special features or functions, just like how a house has basic rooms but no fancy gadgets.\n\nPOD types are typically used when you need to store simple data, like numbers or characters, and you don't need to perform any complex operations on them.\n\n**POD types are often used in containers**, ",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "1066 Chapter 17 The Standard Template Library Iterators VideoNote Iterators are objects that work like pointers, and are used to access data stored in contain- Iterators ers. As th",
+        "section": "",
+        "score": 1.32014799118042
+      }
+    ]
+  },
+  {
+    "question": "How do constructors and destructors work in inheritance?",
+    "category": "section",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**Understanding Constructors and Destructors in Inheritance**\n\nInheritance allows one class to inherit properties from another class. When it comes to constructors and destructors, there are specific rules to follow.\n\n**Constructors in Inheritance**\n\nWhen a derived class is instantiated, the base class constructor is called **before** the derived class constructor. This is because the base class must be initialized before the derived class can use its properties.\n\nThink of it like building a hou",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "13.9 Destructors 799 13.9 Destructors CONCEPT: A destructor is a member function that is automatically called when an object is destroyed. Destructors are member functions with the",
+        "section": "13.9 Destructors 799",
+        "score": 0.6100468635559082
+      }
+    ]
+  },
+  {
+    "question": "What is static dispatch versus dynamic dispatch?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": false,
+    "answer": "\u26a0\ufe0f **This topic wasn't found in your uploaded notes.**\nAnswering from general knowledge. Please verify with your course material or upload relevant notes.\n\n**Static Dispatch vs Dynamic Dispatch**\n=====================================\n\nIn programming, dispatch refers to the process of determining which method or function to call when an object is invoked. There are two primary types of dispatch: static dispatch and dynamic dispatch.\n\n**Static Dispatch**\n-----------------\n\nStatic dispatch, also kn",
+    "sources": []
+  },
+  {
+    "question": "What is the capital of France?",
+    "category": "refusal",
+    "expect_answer": false,
+    "used_notes": false,
+    "answer": "> \u26a0\ufe0f **This topic wasn't found in your uploaded notes.**\n> Answering from general knowledge. Please verify with your course material or upload relevant notes.\n\n**Geography of France**\n--------------------------------\n\nFrance is a country located in Western Europe. It is a member of the European Union and has a rich history, culture, and geography. France is known for its beautiful landscapes, from the mountains of the Alps to the beaches of the Mediterranean coast.\n\n**Capital City of France**\n--",
+    "sources": []
+  },
+  {
+    "question": "Who won the FIFA World Cup in 2022?",
+    "category": "refusal",
+    "expect_answer": false,
+    "used_notes": false,
+    "answer": "I'm here to help with academic questions, but I can provide information on a wide range of topics. Would you like to know something about the history of football or its impact on society?",
+    "sources": []
+  },
+  {
+    "question": "Write me a poem about spring flowers",
+    "category": "offtopic",
+    "expect_answer": false,
+    "used_notes": false,
+    "answer": "> \u26a0\ufe0f **This topic wasn't found in your uploaded notes.**\n> Answering from general knowledge. Please verify with your course material or upload relevant notes.\n\n**Spring Flowers: A Poem**\n\nAs winter's chill begins to fade,\nThe earth awakens from its shade,\nAnd spring's sweet flowers start to sway,\nIn vibrant hues, they dance and play.\n\nThe daffodils, with trumpet bright,\nLead the parade, a sunny sight,\nTheir golden petals shining bold,\nLike rays of sunshine, young and old.\n\nThe tulips, cups of co",
+    "sources": []
+  },
+  {
+    "question": "What is the cookie cutter metaphor in object-oriented programming?",
+    "category": "gaddis_specific",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**The Cookie Cutter Metaphor**\n\nThink of it like a cookie cutter. Imagine you have a cookie cutter that can create different shapes of cookies, such as circles, hearts, and stars. Each cookie shape is an object, and the cookie cutter is like a class. The cookie cutter has a specific design or template that defines the characteristics of each cookie shape. When you use the cookie cutter to create a cookie, you're creating an instance of the class, or an object.\n\nJust as the cookie cutter has a fi",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "the new format. This results in additional work for programmers and a greater opportunity for bugs to appear in the code. This problem has helped influence the shift from procedura",
+        "section": "",
+        "score": 0.8308713436126709
+      }
+    ]
+  },
+  {
+    "question": "What is RTTI and run-time type identification?",
+    "category": "factual",
+    "expect_answer": true,
+    "used_notes": true,
+    "answer": "**RTTI and Run-Time Type Identification**\n\nRTTI stands for **Run-Time Type Information**. Think of it like having a label on a package that tells you what's inside. In programming, RTTI allows us to determine the actual data type of an object at runtime, even if it's a pointer or a reference to a base class. This is useful for polymorphism and dynamic casting.\n\nHere's an analogy to help you understand: Imagine you have a box that can hold different types of toys, such as a car, a doll, or a ball",
+    "sources": [
+      {
+        "name": "tony_gaddis_c++.pdf",
+        "type": "pdf",
+        "snippet": "key word template. Next is a set of angled brackets that contains one or more generic data types used in the template. A generic data type starts with the key word class followed b",
+        "section": "",
+        "score": 1.2422517538070679
+      }
+    ]
+  }
+]

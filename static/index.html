@@ -1,352 +1,400 @@
 <!DOCTYPE html>
-<html lang="en" data-theme="fikryar">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <meta name="theme-color" content="#0A0A0A" />
-  <title>فکریار · Fikryar — Where thinking becomes enlightened</title>
-  <meta name="description" content="Fikryar — a premium AI study companion. It answers strictly from your uploaded notes. Learn. Think. Grow." />
-
-  <!-- Fonts: Inter (headings), Plus Jakarta Sans (body), Noto Nastaliq Urdu -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/css/styles.css" />
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g'%3E%3Cstop offset='0' stop-color='%23FFB347'/%3E%3Cstop offset='1' stop-color='%23FF7A1A'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='50' r='34' fill='url(%23g)'/%3E%3Cpath d='M50 18 L50 82 M18 50 L82 50' stroke='%23fff' stroke-width='3' stroke-opacity='.35'/%3E%3C/svg%3E" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#080604"/>
+  <title>فکریار · Fikaryaar — Your Notes. Your Intelligence.</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&family=Noto+Nastaliq+Urdu:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/css/styles.css"/>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3CradialGradient id='g' cx='40%25' cy='30%25'%3E%3Cstop offset='0' stop-color='%23FFEACC'/%3E%3Cstop offset='1' stop-color='%23E84A00'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='16' cy='16' r='14' fill='url(%23g)'/%3E%3C/svg%3E"/>
 </head>
 <body>
 
-  <!-- ============ ENTRANCE (plays once per session) ============ -->
-  <div id="entrance" aria-hidden="true">
-    <div class="entrance-stage">
-      <div class="entrance-spark"></div>
-      <svg class="entrance-rays" viewBox="0 0 200 200">
-        <g stroke="#FFB347" stroke-width="1.5" fill="none">
-          <line x1="100" y1="100" x2="100" y2="10"/>
-          <line x1="100" y1="100" x2="100" y2="190"/>
-          <line x1="100" y1="100" x2="10" y2="100"/>
-          <line x1="100" y1="100" x2="190" y2="100"/>
-          <line x1="100" y1="100" x2="34" y2="34"/>
-          <line x1="100" y1="100" x2="166" y2="166"/>
-          <line x1="100" y1="100" x2="34" y2="166"/>
-          <line x1="100" y1="100" x2="166" y2="34"/>
-        </g>
-      </svg>
-      <div class="entrance-orb">
-        <svg viewBox="0 0 100 100">
-          <defs>
-            <radialGradient id="entGrad" cx="50%" cy="45%" r="55%">
-              <stop offset="0%" stop-color="#FFE3C2"/>
-              <stop offset="35%" stop-color="#FFB347"/>
-              <stop offset="100%" stop-color="#FF7A1A"/>
-            </radialGradient>
-          </defs>
-          <circle cx="50" cy="50" r="30" fill="url(#entGrad)"/>
-        </svg>
-      </div>
-      <div class="entrance-word urdu">فکریار</div>
+<!-- PARTICLE FIELD -->
+<canvas id="canvas" aria-hidden="true"></canvas>
+
+<!-- NOISE TEXTURE OVERLAY -->
+<div class="noise" aria-hidden="true"></div>
+
+<div id="app">
+
+  <!-- ══════════ NAV ══════════ -->
+  <nav class="nav" id="nav">
+    <button class="nav-brand" data-go="home">
+      <span class="flame-dot" aria-hidden="true"></span>
+      <span class="nav-urdu">فکریار</span>
+      <span class="nav-latin">Fikaryaar</span>
+    </button>
+<div class="nav-center" id="navCenter">
+      <button class="nav-tab active" data-view="home">Home</button>
+      <button class="nav-tab" data-view="chat">Chat</button>
+      <button class="nav-tab" data-view="quiz">Quiz</button>
     </div>
-    <div class="entrance-skip">tap to skip</div>
+    <div class="nav-right">
+      <button class="status-pill" id="kbToggle">
+        <span class="status-dot" id="statusDot"></span>
+        <span id="statusText">Checking</span>
+        <span class="status-arrow">↗</span>
+      </button>
+      <button class="nav-icon" id="aboutLink" aria-label="About">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="7" stroke="currentColor" stroke-width="1.2"/><path d="M8 7v4M8 5h.01" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </button>
+      <button class="nav-icon nav-hamburger" id="hamburger" aria-label="Menu">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </nav>
+
+  <!-- mobile menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <button class="nav-tab active" data-view="home" data-mobile>Home</button>
+    <button class="nav-tab" data-view="chat" data-mobile>Chat</button>
+    <button class="nav-tab" data-view="quiz" data-mobile>Quiz</button>
   </div>
 
-  <!-- ============ ANIMATED BACKGROUND ============ -->
-  <canvas id="bg-canvas" aria-hidden="true"></canvas>
-  <div class="bg-gradient" aria-hidden="true"></div>
-  <div class="embers" aria-hidden="true">
-    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
-  </div>
-  <div class="floating-shapes" aria-hidden="true" id="floatingShapes"></div>
-
-  <!-- ============ APP SHELL ============ -->
-  <div id="app" class="app">
-
-    <!-- ============ SIDEBAR (desktop) ============ -->
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="logo-orb" aria-hidden="true">
-          <svg viewBox="0 0 100 100" class="logo-svg">
-            <defs>
-              <radialGradient id="orbGrad" cx="50%" cy="45%" r="55%">
-                <stop offset="0%" stop-color="#FFE3C2"/>
-                <stop offset="35%" stop-color="#FFB347"/>
-                <stop offset="100%" stop-color="#FF7A1A"/>
-              </radialGradient>
-              <filter id="orbGlow"><feGaussianBlur stdDeviation="2.2"/></filter>
-            </defs>
-            <circle cx="50" cy="50" r="30" fill="url(#orbGrad)" filter="url(#orbGlow)" class="orb-core"/>
-            <circle cx="50" cy="50" r="30" fill="url(#orbGrad)" class="orb-main"/>
-            <g class="orb-rings" stroke="#FFA500" stroke-width="1.4" fill="none" opacity="0.55">
-              <ellipse cx="50" cy="50" rx="42" ry="16" transform="rotate(28 50 50)"/>
-              <ellipse cx="50" cy="50" rx="42" ry="16" transform="rotate(-32 50 50)"/>
-            </g>
-          </svg>
-        </div>
-        <div class="brand-text">
-          <span class="brand-name">فکریار</span>
-          <span class="brand-sub">Fikryar</span>
-        </div>
+  <!-- ══════════ KNOWLEDGE BASE PANEL ══════════ -->
+  <div class="kb-backdrop" id="kbBackdrop"></div>
+  <aside class="kb-panel" id="kbPanel">
+    <div class="kb-header">
+      <div>
+        <div class="kb-title">Knowledge Base</div>
+        <div class="kb-sub" id="kbSubtitle">0 sources · 0 chunks</div>
       </div>
+      <button class="close-btn" id="kbClose">
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
 
-      <nav class="nav">
-        <button class="nav-item active" data-view="home"><span class="nav-ico">✦</span> Home</button>
-        <button class="nav-item" data-view="chat"><span class="nav-ico">❋</span> Chat</button>
-      </nav>
-
-      <div class="side-section">
-        <div class="side-head">
-          <span>Knowledge Base</span>
-          <button class="ghost-btn" id="refreshSources" title="Refresh">↻</button>
-        </div>
-        <ul class="source-list" id="sourceList">
-          <li class="source-empty">No notes uploaded yet.</li>
-        </ul>
-        <label class="upload-pill" for="fileInput">
-          <span>＋ Upload Notes</span>
-          <input type="file" id="fileInput" accept=".pdf,.docx,.pptx,.md,.txt,.markdown" multiple hidden />
-        </label>
+    <label class="drop-zone" id="dropZone" for="fileInput">
+      <div class="dz-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none"><path d="M12 15V3M12 3L8 7M12 3L16 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 15v4a2 2 0 002 2h14a2 2 0 002-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
       </div>
+      <div class="dz-main">Drop files or click to upload</div>
+      <div class="dz-types">PDF · DOCX · PPTX · MD · TXT</div>
+      <input type="file" id="fileInput" accept=".pdf,.docx,.pptx,.md,.txt,.markdown" multiple hidden/>
+    </label>
 
-      <div class="side-foot">
-        <div class="status-line">
-          <span class="dot" id="statusDot"></span>
-          <span id="statusText">Checking…</span>
-        </div>
-        <div class="kb-stats">
-          <span><b id="chunkCount">0</b> chunks</span>
-          <span><b id="sourceCount">0</b> sources</span>
-        </div>
-      </div>
-    </aside>
+    <div class="kb-stats">
+      <div class="kb-stat"><span id="chunkCount">0</span><label>chunks</label></div>
+      <div class="kb-stat-div"></div>
+      <div class="kb-stat"><span id="sourceCount">0</span><label>sources</label></div>
+      <button class="refresh-btn" id="refreshSources" title="Refresh">
+        <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1.5 7a5.5 5.5 0 1010.3-2.6M1.5 4.4V1.5m0 2.9H4.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+      </button>
+    </div>
 
-    <!-- ============ MAIN ============ -->
-    <main class="main" id="main">
+    <ul class="source-list" id="sourceList">
+      <li class="empty-note">No notes uploaded yet.</li>
+    </ul>
+  </aside>
 
-      <!-- Top bar -->
-      <header class="topbar">
-        <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
-        <div class="topbar-title" id="topbarTitle">Home</div>
-        <div class="topbar-actions">
-          <button class="icon-btn" id="themeToggle" title="Toggle theme" aria-label="Toggle theme">☀</button>
-          <button class="icon-btn" id="aboutLink" title="About" aria-label="About">ⓘ</button>
-        </div>
-      </header>
+  <!-- ══════════ MAIN ══════════ -->
+  <main class="main">
 
-      <!-- ============ VIEW: HOME (landing) ============ -->
-      <section class="view active" id="view-home">
-        <div class="view-inner">
+    <!-- ─── HOME VIEW ─── -->
+    <section class="view active" id="view-home">
 
-          <!-- HERO -->
-          <div class="hero">
-            <div class="hero-logo" aria-hidden="true">
-              <svg viewBox="0 0 100 100" class="hero-logo-svg">
-                <defs>
-                  <radialGradient id="heroGrad" cx="50%" cy="45%" r="55%">
-                    <stop offset="0%" stop-color="#FFE3C2"/>
-                    <stop offset="40%" stop-color="#FFB347"/>
-                    <stop offset="100%" stop-color="#FF7A1A"/>
-                  </radialGradient>
-                </defs>
-                <circle cx="50" cy="50" r="30" fill="url(#heroGrad)" class="hero-orb"/>
-                <g stroke="#FFA500" stroke-width="1.5" fill="none" opacity="0.5" class="hero-rings">
-                  <ellipse cx="50" cy="50" rx="44" ry="17" transform="rotate(28 50 50)"/>
-                  <ellipse cx="50" cy="50" rx="44" ry="17" transform="rotate(-32 50 50)"/>
-                </g>
-              </svg>
+      <!-- HERO -->
+      <div class="hero">
+        <div class="hero-inner">
+
+          <div class="hero-left">
+            <div class="hero-kicker">
+              <span class="kicker-line"></span>
+              <span class="kicker-text">AI Study Companion</span>
             </div>
-
-            <div class="hero-title-wrap">
-              <h1 class="hero-title">فکریار</h1>
+            <h1 class="hero-h1">
+              <span class="h1-line1">Your notes.</span>
+              <span class="h1-line2">Your intelligence.</span>
+            </h1>
+            <p class="hero-urdu">جہاں سوچ روشن ہوتی ہے</p>
+            <p class="hero-lede">
+              Fikaryaar doesn't make things up. Ask anything — it retrieves the exact passages from your own lectures, slides and textbooks and streams back a cited answer.
+            </p>
+            <div class="hero-actions">
+              <button class="btn-fire" data-go="chat">
+                <span>Start studying</span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              <button class="btn-ghost" id="scrollHow">How it works</button>
             </div>
-            <p class="hero-subtitle">Your Intelligent Study Companion</p>
-            <p class="hero-tagline urdu">جہاں سوچ روشن ہوتی ہے</p>
-
-            <div class="typer-wrap">
-              <span class="typer" id="typer"></span><span class="cursor">|</span>
-            </div>
-
-            <div class="cta-row">
-              <button class="btn btn-primary glow" data-go="chat">Start Chatting</button>
-              <button class="btn btn-ghost" data-go="chat" id="uploadCta">Upload Notes First</button>
-            </div>
-
-            <p class="hero-note">Answers are grounded <b>only</b> in the notes you upload — cited, accurate, no guessing.</p>
-          </div>
-
-          <!-- HOW IT WORKS PATH -->
-          <div class="path" id="howItWorks">
-            <div class="path-line" aria-hidden="true"></div>
-            <div class="path-step" data-step="1">
-              <span class="path-num">01</span>
-              <h3>Upload your notes</h3>
-              <p>PDF, DOCX, PPTX, MD or TXT — dropped into the sidebar, chunked and indexed in seconds.</p>
-            </div>
-            <div class="path-step" data-step="2">
-              <span class="path-num">02</span>
-              <h3>Ask, in your own words</h3>
-              <p>Type a question the way you'd ask a classmate — Fikryar retrieves the exact passages that matter.</p>
-            </div>
-            <div class="path-step" data-step="3">
-              <span class="path-num">03</span>
-              <h3>Get a cited answer</h3>
-              <p>Every reply streams in with the source chunks it came from, so you can verify, not just trust.</p>
+            <div class="hero-trust">
+              <span class="trust-item">✓ Zero hallucination</span>
+              <span class="trust-item">✓ Source-cited</span>
+              <span class="trust-item">✓ Your notes only</span>
             </div>
           </div>
 
-          <!-- FEATURES GRID -->
-          <div class="features" id="features">
-            <div class="feature-card" data-feature="retrieval">
-              <div class="feature-icon">🔍</div>
-              <h4>Smart Retrieval</h4>
-              <p>Hybrid vector + keyword search with LLM-powered relevance grading finds exactly what you need.</p>
-            </div>
-            <div class="feature-card" data-feature="guardrails">
-              <div class="feature-icon">🛡️</div>
-              <h4>Study Guardrails</h4>
-              <p>Off-topic detection, hallucination resistance, and strict "notes-only" answering — no made-up facts.</p>
-            </div>
-            <div class="feature-card" data-feature="citations">
-              <div class="feature-icon">📎</div>
-              <h4>Source Citations</h4>
-              <p>Every answer shows the exact note snippets used. Hover to preview, click to jump to context.</p>
-            </div>
-            <div class="feature-card" data-feature="streaming">
-              <div class="feature-icon">⚡</div>
-              <h4>Instant Streaming</h4>
-              <p>Token-by-token SSE streaming with Groq's ultra-fast LLM — answers appear as you think.</p>
-            </div>
-            <div class="feature-card" data-feature="multilingual">
-              <div class="feature-icon">🌐</div>
-              <h4>Multilingual Ready</h4>
-              <p>Supports Urdu, Arabic, and RTL scripts natively — study in your language of choice.</p>
-            </div>
-            <div class="feature-card" data-feature="privacy">
-              <div class="feature-icon">🔒</div>
-              <h4>Local-First</h4>
-              <p>Embeddings run locally via sentence-transformers. Only questions leave your machine.</p>
-            </div>
-          </div>
-
-          <!-- STATS BAR -->
-          <div class="stats-bar" id="statsBar">
-            <div class="stat-item">
-              <span class="stat-value" id="statChunks">0</span>
-              <span class="stat-label">Chunks Indexed</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value" id="statSources">0</span>
-              <span class="stat-label">Sources</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value" id="statQuestions">0</span>
-              <span class="stat-label">Questions Asked</span>
-            </div>
-            <div class="stat-item">
-              <span class="stat-value" id="statAccuracy">—</span>
-              <span class="stat-label">Relevance</span>
-            </div>
-          </div>
-
-          <!-- TEST QUESTIONS -->
-          <div class="test-questions">
-            <h3>Try These Questions</h3>
-            <p class="test-hint">Based on the C++ textbook currently loaded</p>
-            <div class="test-chips">
-              <button class="chip" data-q="What is a class?">What is a class?</button>
-              <button class="chip" data-q="Explain inheritance and subclasses.">Explain inheritance</button>
-              <button class="chip" data-q="What is operator overloading?">Operator overloading</button>
-              <button class="chip" data-q="What is dynamic cast used for in C++?">What is dynamic cast?</button>
-              <button class="chip" data-q="What is the diamond problem in C++?">Diamond problem</button>
-              <button class="chip" data-q="What is the rule of five?">Rule of five</button>
-              <button class="chip" data-q="What is polymorphism in C++?">Polymorphism</button>
-              <button class="chip" data-q="What is a vtable?">VTable</button>
-            </div>
-          </div>
-
-        </div>
-      </section>
-
-      <!-- ============ VIEW: CHAT ============ -->
-      <section class="view chat-view" id="view-chat">
-        <div class="chat-layout">
-          <!-- Center: conversation -->
-          <div class="chat-center">
-            <div class="chat-scroll" id="chat">
-              <div class="welcome" id="welcome">
-                <div class="avatar-orb" aria-hidden="true">
-                  <svg viewBox="0 0 100 100">
-                    <defs><radialGradient id="avGrad" cx="50%" cy="45%" r="55%">
-                      <stop offset="0%" stop-color="#FFE3C2"/><stop offset="40%" stop-color="#FFB347"/><stop offset="100%" stop-color="#FF7A1A"/>
-                    </radialGradient></defs>
-                    <circle cx="50" cy="50" r="30" fill="url(#avGrad)" class="avatar-core"/>
-                    <g stroke="#FFA500" stroke-width="1.5" fill="none" opacity="0.5" class="avatar-rings">
-                      <ellipse cx="50" cy="50" rx="44" ry="17" transform="rotate(28 50 50)"/>
-                      <ellipse cx="50" cy="50" rx="44" ry="17" transform="rotate(-32 50 50)"/>
-                    </g>
-                  </svg>
-                </div>
-                <h2>Ask Fikryar</h2>
-                <p>I answer strictly from your uploaded notes — accurate, grounded, and fast.</p>
-                <div class="welcome-suggest">
-                  <button class="chip" data-q="What is a class?">What is a class?</button>
-                  <button class="chip" data-q="Explain inheritance and subclasses.">Explain inheritance</button>
-                  <button class="chip" data-q="What is operator overloading?">Operator overloading</button>
-                </div>
+          <div class="hero-right">
+            <div class="demo-card" id="demoCard">
+              <div class="demo-header">
+                <span class="demo-flame" aria-hidden="true"></span>
+                <span class="demo-label">Live example</span>
               </div>
-              <div class="messages" id="messages"></div>
+              <div class="demo-q">"Explain polymorphism in OOP"</div>
+              <div class="demo-divider"></div>
+              <div class="demo-a" id="demoText"></div>
+              <div class="demo-sources">
+                <span class="demo-src"><span class="src-num">1</span>oop-notes.pdf · p.14</span>
+                <span class="demo-src"><span class="src-num">2</span>lecture3.pptx · slide 8</span>
+              </div>
+              <div class="demo-cursor" id="demoCursor">|</div>
             </div>
+            <div class="card-glow" aria-hidden="true"></div>
+          </div>
 
+        </div>
+      </div>
+
+      <!-- HOW IT WORKS -->
+      <div class="section how" id="howSection">
+        <div class="section-inner">
+          <div class="section-head">
+            <span class="section-tag">Process</span>
+            <h2 class="section-h2">From upload to answer in seconds</h2>
+          </div>
+          <div class="steps">
+            <div class="step">
+              <div class="step-num">01</div>
+              <div class="step-body">
+                <h3>Upload your notes</h3>
+                <p>Drop in PDF, DOCX, PPTX, MD or TXT files. Fikaryaar chunks and indexes them instantly into a vector store.</p>
+              </div>
+            </div>
+            <div class="step-arrow" aria-hidden="true">→</div>
+            <div class="step">
+              <div class="step-num">02</div>
+              <div class="step-body">
+                <h3>Ask a question</h3>
+                <p>Type naturally — like asking a friend. The RAG pipeline retrieves the most relevant chunks from your material.</p>
+              </div>
+            </div>
+            <div class="step-arrow" aria-hidden="true">→</div>
+            <div class="step">
+              <div class="step-num">03</div>
+              <div class="step-body">
+                <h3>Get a cited answer</h3>
+                <p>The answer streams in with references back to your exact source files. Verify everything, trust nothing blindly.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEATURES -->
+      <div class="section features" id="featSection">
+        <div class="section-inner">
+          <div class="section-head">
+            <span class="section-tag">Features</span>
+            <h2 class="section-h2">Not another boring RAG app</h2>
+          </div>
+          <div class="feat-grid">
+            <div class="feat-card">
+              <div class="feat-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 12l2 2 4-4M21 12a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <h3>Guardrail enforced</h3>
+              <p>Ask something off-topic and Fikaryaar says so — it won't hallucinate an answer from outside your notes.</p>
+            </div>
+            <div class="feat-card">
+              <div class="feat-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <h3>Streaming answers</h3>
+              <p>No waiting for the full response. Tokens stream back live so you can start reading before it's even done.</p>
+            </div>
+            <div class="feat-card feat-card--highlight">
+              <div class="feat-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <h3>Footnoted citations</h3>
+              <p>Every claim maps back to a source chunk. See the file name, know where it came from.</p>
+              <span class="feat-badge">Core feature</span>
+            </div>
+            <div class="feat-card">
+              <div class="feat-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+              <h3>Conversation memory</h3>
+              <p>Multi-turn context window — follow up, dig deeper, or pivot topics without losing the thread.</p>
+            </div>
+            <div class="feat-card">
+              <div class="feat-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <h3>Multi-format upload</h3>
+              <p>PDF, Word, PowerPoint, Markdown, plain text — whatever format your notes are in, it handles them.</p>
+            </div>
+            <div class="feat-card">
+              <div class="feat-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <h3>Live knowledge stats</h3>
+              <p>See exactly how many chunks and sources are indexed. Know what Fikaryaar is working with at all times.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <footer class="footer">
+        <div class="footer-inner">
+          <div class="footer-brand">
+            <span class="flame-dot"></span>
+            <span class="footer-urdu">فکریار</span>
+          </div>
+          <p class="footer-note">Answers grounded only in your notes · No hallucination · No guessing</p>
+        </div>
+      </footer>
+
+    </section>
+
+    <!-- ─── CHAT VIEW ─── -->
+    <section class="view" id="view-chat">
+      <div class="chat-wrap">
+
+        <!-- sidebar -->
+        <aside class="chat-sidebar">
+          <div class="cs-head">
+            <div class="cs-title">Notes</div>
+            <button class="cs-upload-btn" id="sidebarUpload">
+              <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 4l3-3 3 3M2 11h10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Upload
+            </button>
+          </div>
+          <ul class="cs-list" id="sidebarSourceList">
+            <li class="cs-empty">No notes yet</li>
+          </ul>
+          <div class="cs-foot">
+            <span id="sideChunkCount">0</span> chunks indexed
+          </div>
+        </aside>
+
+        <!-- conversation -->
+        <div class="chat-col">
+          <div class="chat-scroll" id="chat">
+            <div class="welcome-screen" id="welcome">
+              <div class="ws-flame" aria-hidden="true"></div>
+              <h2 class="ws-h">What are you studying?</h2>
+              <p class="ws-p">Fikaryaar answers only from your uploaded notes — cited, grounded, no guessing.</p>
+              <div class="ws-chips" id="suggestChips">
+                <button class="chip" data-q="What is a class in OOP?">What is a class?</button>
+                <button class="chip" data-q="Explain inheritance with an example.">Explain inheritance</button>
+                <button class="chip" data-q="What is polymorphism?">Polymorphism</button>
+                <button class="chip" data-q="Define encapsulation.">Encapsulation</button>
+              </div>
+            </div>
+            <div class="messages" id="messages"></div>
+          </div>
+
+          <div class="composer-wrap">
             <form class="composer" id="composer" autocomplete="off">
               <textarea id="question" placeholder="Ask anything from your notes…" rows="1"></textarea>
-              <button type="submit" class="send-btn" id="sendBtn" disabled aria-label="Send">
-                <svg viewBox="0 0 24 24" width="20" height="20"><path d="M3 11l18-8-8 18-2-7-8-3z" fill="currentColor"/></svg>
-              </button>
+              <div class="composer-actions">
+                <span class="char-hint" id="charHint"></span>
+                <button type="submit" class="send-btn" id="sendBtn" disabled aria-label="Send">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </button>
+              </div>
             </form>
+            <div class="composer-hint">↵ to send · shift+↵ for new line</div>
           </div>
         </div>
-      </section>
 
-    </main>
+      </div>
+    </section>
 
-    <!-- ============ MOBILE BOTTOM NAV ============ -->
-    <nav class="bottom-nav">
-      <button class="bn-item active" data-view="home"><span class="bn-ico">✦</span><span>Home</span></button>
-      <button class="bn-item" data-view="chat"><span class="bn-ico">❋</span><span>Chat</span></button>
-    </nav>
-  </div>
-
-  <!-- ============ ABOUT MODAL ============ -->
-  <div class="modal" id="aboutModal" role="dialog" aria-modal="true">
-    <div class="modal-card">
-      <button class="modal-close" id="modalClose" aria-label="Close">✕</button>
-      <div class="brand center">
-        <div class="logo-orb sm" aria-hidden="true">
-          <svg viewBox="0 0 100 100" class="logo-svg"><circle cx="50" cy="50" r="30" fill="url(#orbGrad)"/></svg>
+    <!-- ─── QUIZ VIEW ─── -->
+    <section class="view" id="view-quiz">
+      <div class="quiz-wrap">
+        <div class="quiz-setup" id="quizSetup">
+          <div class="qs-inner">
+            <div class="qs-flame" aria-hidden="true"></div>
+            <h2 class="qs-h">امتحان <span class="qs-sub">Imtehaan — Test yourself</span></h2>
+            <p class="qs-p">Enter a topic from your notes. Imtehaan will generate 5 questions from Easy to Extreme and evaluate your answers in real-time.</p>
+            <div class="qs-form">
+              <input type="text" id="quizTopic" placeholder="Topic (e.g. Object Oriented Programming, Thermodynamics…)" class="quiz-input"/>
+              <button class="btn-fire" id="startQuiz">
+                <span>Start امتحان</span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+            <div class="qs-levels">
+              <span class="ql">🟢 Easy</span>
+              <span class="ql">🟡 Medium</span>
+              <span class="ql">🔴 Hard</span>
+              <span class="ql">💀 Extreme</span>
+            </div>
+          </div>
         </div>
-        <div>
-          <div class="brand-name big">فکریار</div>
-          <div class="muted">Fikryar · v1.0</div>
+
+        <div class="quiz-active" id="quizActive" style="display:none">
+          <div class="qa-header">
+            <div class="qa-topic" id="qaTopic"></div>
+            <div class="qa-progress" id="qaProgress">Question 1/5</div>
+            <button class="btn-ghost qa-quit" id="quitQuiz">End quiz</button>
+          </div>
+          <div class="qa-body">
+            <div class="qa-level-badge" id="qaLevel"></div>
+            <div class="qa-question" id="qaQuestion"></div>
+            <textarea class="qa-answer" id="qaAnswer" placeholder="Type your answer here… be as detailed as you can." rows="5"></textarea>
+            <button class="btn-fire" id="submitAnswer">
+              <span>Submit answer</span>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+          <div class="qa-feedback" id="qaFeedback" style="display:none"></div>
+          <button class="btn-fire qa-next" id="nextQuestion" style="display:none">
+            <span>Next question →</span>
+          </button>
+        </div>
+
+        <div class="quiz-report" id="quizReport" style="display:none">
+          <div class="qr-inner">
+            <div class="qr-grade" id="qrGrade"></div>
+            <div class="qr-score" id="qrScore"></div>
+            <div class="qr-urdu" id="qrUrdu"></div>
+            <div class="qr-bars" id="qrBars"></div>
+            <button class="btn-fire" id="retakeQuiz">Take another quiz</button>
+          </div>
         </div>
       </div>
-      <p class="modal-body">Fikryar is a study companion that answers <b>only from your notes</b>. Upload PDFs, DOCX, PPTX, MD or TXT, then ask away — every answer is grounded and source-cited.</p>
-      <ul class="modal-list">
-        <li>✦ Retrieval-Augmented Generation with guardrails</li>
-        <li>◈ Off-topic & irrelevant filtering</li>
-        <li>❋ Source-cited, hallucination-resistant answers</li>
-        <li>🧠 Local embeddings, Groq LLM streaming</li>
-        <li>🌙 Dark/light theme with persistence</li>
-      </ul>
+    </section>
+
+  </main>
+</div>
+
+<!-- ABOUT MODAL -->
+<div class="modal-backdrop" id="aboutModal">
+  <div class="modal-box" role="dialog" aria-modal="true" aria-label="About Fikaryaar">
+    <button class="close-btn modal-x" id="modalClose">
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <div class="modal-flame" aria-hidden="true"></div>
+    <h2 class="modal-title"><span class="urdu-inline">فکریار</span> Fikaryaar</h2>
+    <p class="modal-sub">v1.0 · Study companion powered by RAG</p>
+    <p class="modal-desc">Upload your study material and ask anything. Every answer is retrieved directly from your notes — source-cited, hallucination-resistant, and grounded in exactly what you gave it.</p>
+    <div class="modal-tags">
+      <span class="m-tag">RAG pipeline</span>
+      <span class="m-tag">Guardrails enforced</span>
+      <span class="m-tag">SSE streaming</span>
+      <span class="m-tag">Source citations</span>
     </div>
   </div>
+</div>
 
-  <!-- ============ TOAST ============ -->
-  <div class="toast" id="toast"></div>
+<!-- UPLOAD PROGRESS -->
+<div class="upload-toast" id="uploadToast">
+  <div class="ut-text" id="utText">Uploading…</div>
+  <div class="ut-bar"><div class="ut-fill" id="utFill"></div></div>
+</div>
 
-  <!-- ============ UPLOAD PROGRESS ============ -->
-  <div class="upload-progress" id="uploadProgress">
-    <div class="upload-text">📤 Uploading…</div>
-    <div class="bar"><div class="bar-fill"></div></div>
-  </div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-  <script src="/js/app.js"></script>
+<script src="/js/app.js"></script>
 </body>
 </html>

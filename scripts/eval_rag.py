@@ -79,10 +79,10 @@ def _retrieval_eval() -> list[dict]:
     return rows
 
 
-def _full_eval() -> list[dict]:
+async def _full_eval() -> list[dict]:
     rows = []
     for case in EVAL_SET:
-        result = ask(case.question, [])
+        result = await ask(case.question, [])
         rows.append(
             {
                 "question": case.question,
@@ -129,7 +129,8 @@ def main() -> None:
     if args.mode == "retrieval":
         results = _retrieval_eval()
     else:
-        results = _full_eval()
+        import asyncio
+        results = asyncio.run(_full_eval())
 
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(results, indent=2), encoding="utf-8")

@@ -16,7 +16,7 @@ log = get_logger(__name__)
 _REWRITE_THRESHOLD_WORDS = 6  # short follow-ups likely need rewriting
 
 
-def rewrite_question_node(state: GraphState) -> dict:
+async def rewrite_question_node(state: GraphState) -> dict:
     question = state["question"]
     history = state.get("history", "")
 
@@ -26,7 +26,7 @@ def rewrite_question_node(state: GraphState) -> dict:
 
     try:
         prompt = REWRITE_PROMPT.format(history=history, question=question)
-        resp = get_rewrite_llm().invoke(prompt)
+        resp = await get_rewrite_llm().ainvoke(prompt)
         rewritten = str(resp.content).strip().strip('"').strip("'")
         if rewritten and len(rewritten) < 500:
             log.info(f"Rewrote question: {question!r} -> {rewritten!r}")

@@ -17,10 +17,12 @@ class GraphState(TypedDict, total=False):
     question: str                 # the (possibly rewritten) user question
     original_question: str        # what the user actually typed
     history: str                  # short conversation history string
-    intent: str                   # "STUDY" | "OFFTOPIC"
+    chat_history: List[dict]      # raw conversation history list of dicts
+    intent: str                   # "STUDY" | "OFFTOPIC" | "GREETING" | "QUIZ_REQUEST"
     documents: List[Document]     # retrieved + graded note chunks
     sources: List[dict]           # metadata about chunks, for the UI
     retrieval_scores: dict        # chunk index -> L2 distance from retrieve step
     answer: str                   # the final assistant message
     used_notes: bool              # did we find anything relevant?
+    validation_result: dict       # results from Mehakkim validation
     error: str                    # populated if something went wrong
