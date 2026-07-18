@@ -35,7 +35,7 @@ class Settings(BaseSettings):
 
     # ---- LLM (Gemini, free tier) ----
     gemini_api_key: str = ""
-    gemini_model: str = "gemini-1.5-flash"
+    gemini_model: str = "gemini-3.1-flash-lite"
 
     # ---- Embeddings (local sentence-transformers, free) ----
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"

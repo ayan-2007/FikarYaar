@@ -32,6 +32,7 @@ from app.api.schemas import (
     UploadResponse,
     QuizStartRequest,
     QuizAnswerRequest,
+    ResearchRequest,
 )
 from app.core.config import settings
 from app.core.logging import get_logger
@@ -96,29 +97,23 @@ async def chat(req: ChatRequest):
     )
 
 
+
 # ---------------------------------------------------------------------------
 # Chat (SSE streaming)
 # ---------------------------------------------------------------------------
-async def _stream_answer(question: str, history: list[dict]):
-    """
-    Stream the answer as Server-Sent Events.
+async def _stream_ustad(question: str, history: list[dict]):
 
-    We run the (CPU/IO-bound) graph in a thread so it doesn't block the event
-    loop, then we 'fake' a token-by-token stream by emitting the answer in
-    small chunks. This gives a great UX without depending on a streaming LLM
-    endpoint (Groq streaming differs between SDK versions).
     """
-    # 1) thinking indicator
+    Stream the Ustad answer as Server-Sent Events.
+    """
     yield "event: status\ndata: " + json.dumps({"step": "thinking"}) + "\n\n"
     await asyncio.sleep(0)
 
     result = await ask(question, history)
 
-    # 2) send sources first so the UI can render them above the answer
     sources = result.get("sources", [])
     yield "event: sources\ndata: " + json.dumps({"sources": sources}) + "\n\n"
 
-    # 3) stream the answer in ~6-word chunks for a typewriter effect
     answer = result.get("answer", "")
     words = answer.split(" ")
     chunk_size = 4
@@ -129,9 +124,8 @@ async def _stream_answer(question: str, history: list[dict]):
             token = " ".join(buf) + " "
             buf = []
             yield "event: token\ndata: " + json.dumps({"token": token}) + "\n\n"
-            await asyncio.sleep(0.02)  # smooth cadence
+            await asyncio.sleep(0.02)
 
-    # 4) done
     yield (
         "event: done\ndata: "
         + json.dumps({"used_notes": bool(result.get("used_notes", False))})
@@ -139,15 +133,109 @@ async def _stream_answer(question: str, history: list[dict]):
     )
 
 
+async def _stream_muhaqqiq(question: str, mode: str, source_filter: str | None):
+    """
+    Run Muhaqqiq in the requested mode and emit a single structured SSE event.
+    """
+    from app.rag.vectorstore import retrieve_with_threshold, get_vectorstore
+    from app.agents.muhaqqiq import analyze_paper, cross_examine_claim, synthesize_multiple_papers
+
+    yield "event: status\ndata: " + json.dumps({"step": "analyzing"}) + "\n\n"
+    await asyncio.sleep(0)
+
+    # Build where-filter for Chroma if a source is selected
+    where = {"source_name": source_filter} if source_filter else None
+
+    try:
+        if mode == "analyze":
+            # Pull a broad set of chunks from the selected paper
+            vs = get_vectorstore()
+            raw = vs._collection.get(
+                where=where,
+                include=["documents", "metadatas"],
+                limit=20,
+            )
+            chunks = [
+                {"source": (m or {}).get("source_name", "paper"), "text": t, "metadata": m or {}}
+                for t, m in zip(raw.get("documents", []), raw.get("metadatas", []))
+            ]
+            result = await analyze_paper(chunks)
+            yield "event: muhaqqiq\ndata: " + json.dumps({"mode": "analyze", "data": result}) + "\n\n"
+
+        elif mode == "cross_examine":
+            # Retrieve relevant chunks for the claim
+            scored = retrieve_with_threshold(
+                question, candidate_k=12, final_k=8,
+            )
+            chunks = [
+                {"source": doc.metadata.get("source_name", "paper"), "text": doc.page_content, "metadata": doc.metadata}
+                for doc, _ in scored
+                if not source_filter or doc.metadata.get("source_name") == source_filter
+            ]
+            result = await cross_examine_claim(question, chunks)
+            yield "event: muhaqqiq\ndata: " + json.dumps({"mode": "cross_examine", "data": result}) + "\n\n"
+
+        elif mode == "synthesize":
+            # Group chunks per source and synthesize across all uploaded papers
+            from app.rag.vectorstore import list_sources
+            sources = list_sources()
+            papers_data = []
+            vs = get_vectorstore()
+            for src in sources:
+                raw = vs._collection.get(
+                    where={"source_name": src["name"]},
+                    include=["documents", "metadatas"],
+                    limit=8,
+                )
+                papers_data.append({
+                    "title": src["name"],
+                    "chunks": [
+                        {"text": t, "metadata": m or {}}
+                        for t, m in zip(raw.get("documents", []), raw.get("metadatas", []))
+                    ]
+                })
+            result = await synthesize_multiple_papers(papers_data)
+            yield "event: muhaqqiq\ndata: " + json.dumps({"mode": "synthesize", "data": result}) + "\n\n"
+
+        else:
+            yield "event: muhaqqiq\ndata: " + json.dumps({"mode": mode, "data": {"error": f"Unknown mode: {mode}"}}) + "\n\n"
+
+    except Exception as e:
+        yield "event: muhaqqiq\ndata: " + json.dumps({"mode": mode, "data": {"error": str(e)}}) + "\n\n"
+
+    yield "event: done\ndata: " + json.dumps({}) + "\n\n"
+
+
+
+async def _stream_answer(question: str, history: list[dict]):
+    """
+    Legacy alias — kept so any external callers still work.
+    Routes to Ustad by default.
+    """
+    async for chunk in _stream_ustad(question, history):
+        yield chunk
+
+
 @router.post("/chat/stream")
 async def chat_stream(req: ChatRequest):
     history = [{"role": m.role, "content": m.content} for m in req.history]
+    agent = (req.agent or "ustad").lower()
+
+    if agent == "muhaqqiq":
+        gen = _stream_muhaqqiq(
+            req.question,
+            mode=req.muhaqqiq_mode or "analyze",
+            source_filter=req.source_filter,
+        )
+    else:
+        gen = _stream_ustad(req.question, history)
+
     return StreamingResponse(
-        _stream_answer(req.question, history),
+        gen,
         media_type="text/event-stream",
         headers={
             "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",  # disable proxy buffering (Render/nginx)
+            "X-Accel-Buffering": "no",
         },
     )
 
@@ -156,7 +244,7 @@ async def chat_stream(req: ChatRequest):
 # Upload notes
 # ---------------------------------------------------------------------------
 @router.post("/upload", response_model=UploadResponse)
-async def upload_notes(files: List[UploadFile] = File(...)):
+def upload_notes(files: List[UploadFile] = File(...)):
     """
     Accept one or more notes files, validate them, save to data/uploads/, and
     ingest them into the vector store immediately.
@@ -170,8 +258,8 @@ async def upload_notes(files: List[UploadFile] = File(...)):
     total_chunks = 0
 
     for f in files:
-        raw = await f.read()
-        await assert_file_size_ok(raw)
+        raw = f.file.read()
+        assert_file_size_ok(raw)
 
         ext = Path(f.filename or "").suffix.lower()
         assert_magic_bytes(ext, raw[:8])
@@ -279,18 +367,32 @@ async def quiz_start(req: QuizStartRequest):
             detail="Your knowledge base is empty! Please upload study notes (PDF, DOCX, TXT) first."
         )
     
-    # Retrieve top 8 candidates for the topic
-    log.info(f"Retrieving chunks for topic: {req.topic}")
-    scored_docs = retrieve_with_threshold(req.topic, candidate_k=15, final_k=8)
-    log.info(f"Retrieved {len(scored_docs)} chunks")
-    
-    chunks = [
-        {
-            "source": doc.metadata.get("source_name", "notes"),
-            "text": doc.page_content
-        }
-        for doc, _ in scored_docs
-    ]
+    # Retrieve top 8 candidates for the topic, optionally scoped to one source
+    log.info(f"Retrieving chunks for topic: {req.topic}, source_filter={req.source_filter}")
+
+    if req.source_filter:
+        # Pull directly from Chroma with a metadata filter, then rank by similarity
+        from app.rag.vectorstore import get_vectorstore
+        vs = get_vectorstore()
+        raw = vs._collection.get(
+            where={"source_name": req.source_filter},
+            include=["documents", "metadatas"],
+            limit=20,
+        )
+        chunks = [
+            {"source": (m or {}).get("source_name", req.source_filter), "text": t}
+            for t, m in zip(raw.get("documents", []), raw.get("metadatas", []))
+        ][:8]
+    else:
+        scored_docs = retrieve_with_threshold(req.topic, candidate_k=15, final_k=8)
+        log.info(f"Retrieved {len(scored_docs)} chunks")
+        chunks = [
+            {
+                "source": doc.metadata.get("source_name", "notes"),
+                "text": doc.page_content
+            }
+            for doc, _ in scored_docs
+        ]
     
     log.info(f"Starting quiz with {len(chunks)} chunks")
     res = await start_quiz(req.topic, chunks)

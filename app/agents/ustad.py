@@ -74,6 +74,20 @@ async def stream_answer(
     try:
         async for chunk in llm.astream(messages):
             if chunk.content:
-                yield chunk.content
+                content = chunk.content
+                if isinstance(content, list):
+                    # Gemini sometimes returns a list of blocks instead of a string
+                    text_parts = []
+                    for block in content:
+                        if isinstance(block, dict) and "text" in block:
+                            text_parts.append(block["text"])
+                        elif isinstance(block, str):
+                            text_parts.append(block)
+                        else:
+                            text_parts.append(str(block))
+                    content = "".join(text_parts)
+                
+                if content:
+                    yield str(content)
     except Exception as e:
         yield f"\n\nI encountered an error generating the response: {str(e)}"

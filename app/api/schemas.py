@@ -18,6 +18,9 @@ class Message(BaseModel):
 class ChatRequest(BaseModel):
     question: str = Field(..., min_length=1, max_length=2000)
     history: List[Message] = Field(default_factory=list)
+    agent: Optional[str] = Field(default="ustad", description="'ustad' or 'muhaqqiq'")
+    muhaqqiq_mode: Optional[str] = Field(default="analyze", description="'analyze' | 'cross_examine' | 'synthesize'")
+    source_filter: Optional[str] = Field(default=None, description="Limit retrieval to this source file")
 
 
 class SourceInfo(BaseModel):
@@ -55,9 +58,16 @@ class UploadResponse(BaseModel):
 
 class QuizStartRequest(BaseModel):
     topic: str = Field(..., min_length=1, max_length=200)
+    source_filter: Optional[str] = Field(default=None, description="Limit quiz retrieval to this source file")
 
 
 class QuizAnswerRequest(BaseModel):
     session_id: str
     question_num: int
     answer: str = Field(..., min_length=1, max_length=5000)
+
+
+class ResearchRequest(BaseModel):
+    mode: str = Field(default="analyze", description="'analyze' | 'cross_examine' | 'synthesize'")
+    source_filter: Optional[str] = Field(default=None, description="Scope retrieval to this source file")
+    claim: Optional[str] = Field(default=None, description="The claim or question for cross_examine mode")

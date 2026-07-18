@@ -275,6 +275,33 @@
 
         <!-- conversation -->
         <div class="chat-col">
+          <!-- Agent selector -->
+          <div class="agent-selector" id="agentSelector">
+            <button class="agent-pill active" id="agentUstad" data-agent="ustad">
+              <span class="agent-pill-icon">🎓</span>
+              <span>Ustad <span class="agent-pill-sub">Notes Q&amp;A</span></span>
+            </button>
+            <button class="agent-pill" id="agentMuhaqqiq" data-agent="muhaqqiq">
+              <span class="agent-pill-icon">🔬</span>
+              <span>Muhaqqiq <span class="agent-pill-sub">Research</span></span>
+            </button>
+          </div>
+
+          <!-- Muhaqqiq mode bar (hidden by default) -->
+          <div class="muhaqqiq-bar" id="muhaqqiqBar" style="display:none">
+            <div class="mq-source-row">
+              <label class="mq-source-label" for="mqSourceSelect">Paper:</label>
+              <select id="mqSourceSelect" class="mq-select">
+                <option value="">— pick a paper —</option>
+              </select>
+            </div>
+            <div class="mq-modes">
+              <button class="mq-mode-btn active" data-mode="analyze" id="mqModeAnalyze">🔍 Analyze Paper</button>
+              <button class="mq-mode-btn" data-mode="cross_examine" id="mqModeCross">⚖️ Cross-Examine</button>
+              <button class="mq-mode-btn" data-mode="synthesize" id="mqModeSynth">🧬 Synthesize All</button>
+            </div>
+          </div>
+
           <div class="chat-scroll" id="chat">
             <div class="welcome-screen" id="welcome">
               <div class="ws-flame" aria-hidden="true"></div>
@@ -315,13 +342,33 @@
             <div class="qs-flame" aria-hidden="true"></div>
             <h2 class="qs-h">امتحان <span class="qs-sub">Imtehaan — Test yourself</span></h2>
             <p class="qs-p">Enter a topic from your notes. Imtehaan will generate 5 questions from Easy to Extreme and evaluate your answers in real-time.</p>
-            <div class="qs-form">
+
+            <!-- 0-file state -->
+            <div class="qs-no-file" id="qsNoFile" style="display:none">
+              <div class="qs-no-file-icon">📂</div>
+              <p class="qs-no-file-text">No notes uploaded yet.<br>Upload a file first to start a quiz.</p>
+              <button class="btn-fire" onclick="openKB()">
+                <span>Upload notes</span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1v8M4 4l3-3 3 3M2 11h10" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+
+            <!-- 1-or-more-file state -->
+            <div class="qs-form" id="qsForm">
+              <!-- file picker shown only when ≥2 sources -->
+              <div class="qs-file-picker" id="qsFilePicker" style="display:none">
+                <label class="qs-file-label" for="quizFileSelect">Choose a file to quiz from</label>
+                <select id="quizFileSelect" class="quiz-select">
+                  <option value="">— All uploaded notes —</option>
+                </select>
+              </div>
               <input type="text" id="quizTopic" placeholder="Topic (e.g. Object Oriented Programming, Thermodynamics…)" class="quiz-input"/>
               <button class="btn-fire" id="startQuiz">
                 <span>Start امتحان</span>
                 <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7h10M8 3l4 4-4 4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
               </button>
             </div>
+
             <div class="qs-levels">
               <span class="ql">🟢 Easy</span>
               <span class="ql">🟡 Medium</span>

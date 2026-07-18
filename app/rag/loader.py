@@ -23,21 +23,13 @@ SUPPORTED_EXTS = {".pdf", ".docx", ".md", ".txt", ".markdown", ".pptx"}
 
 
 def _load_pdf(path: Path) -> List[Document]:
-    """Load a PDF using pdfplumber, fall back to pypdf."""
-    # pdfplumber
-    try:
-        from langchain_community.document_loaders import PDFPlumberLoader
-
-        docs = PDFPlumberLoader(str(path)).load()
-        if docs and any(d.page_content.strip() for d in docs):
-            return docs
-    except Exception as e:  # noqa: BLE001
-        log.warning(f"pdfplumber failed on {path.name}: {e}")
-
-    # fallback: pypdf
+    """Load a PDF using PyPDFLoader for high speed and low memory usage."""
     from langchain_community.document_loaders import PyPDFLoader
-
-    return PyPDFLoader(str(path)).load()
+    try:
+        return PyPDFLoader(str(path)).load()
+    except Exception as e:
+        log.error(f"PyPDFLoader failed on {path.name}: {e}")
+        return []
 
 
 def _load_docx(path: Path) -> List[Document]:

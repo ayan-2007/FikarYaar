@@ -3,7 +3,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
 
-const state = { view: "home", history: [], streaming: false };
+const state = { view: "home", history: [], streaming: false, agent: "ustad", muhaqqiqMode: "analyze", muhaqqiqSource: "" };
 
 /* ═══ TOAST ════════════════════════════════════════════════ */
 let _toastT;
@@ -22,7 +22,7 @@ function go(view) {
   $$(".nav-tab").forEach(b => b.classList.toggle("active", b.dataset.view === view));
   closeMobileMenu();
   window.scrollTo({ top: 0, behavior: "smooth" });
-  if (view === "chat") { $("#question").focus(); syncSidebar(); }
+  if (view === "chat") { $("#question").focus(); }
 }
 $$("[data-view]").forEach(b => b.addEventListener("click", () => go(b.dataset.view)));
 $$("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
@@ -152,11 +152,13 @@ function addUserMsg(text) {
   return bubble;
 }
 
-function addBotSlot() {
+function addBotSlot(agentLabel) {
   hideWelcome();
   const wrap = mk("div", "msg msg-bot");
   const header = mk("div", "bot-header");
-  header.innerHTML = `<span class="bot-flame" aria-hidden="true"></span><span class="bot-name">Fikaryaar</span>`;
+  const label = agentLabel || "Fikaryaar";
+  const icon = agentLabel === "Muhaqqiq" ? "🔬" : "";
+  header.innerHTML = `<span class="bot-flame" aria-hidden="true">${icon}</span><span class="bot-name">${esc(label)}</span>`;
   const bubble = mk("div", "bubble");
   const typing = mk("div", "typing");
   typing.innerHTML = "<span></span><span></span><span></span>";
@@ -205,14 +207,62 @@ $("#composer").addEventListener("submit", async e => {
   ta.value = ""; ta.style.height = "auto"; $("#sendBtn").disabled = true;
   state.streaming = true;
 
-  const bubble = addBotSlot();
+  if (state.agent === "muhaqqiq") {
+    const bubble = addBotSlot("Muhaqqiq");
+    try {
+      const res = await fetch(`${API}/chat/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          question: q,
+          history: [],
+          agent: "muhaqqiq",
+          muhaqqiq_mode: state.muhaqqiqMode,
+          source_filter: state.muhaqqiqSource || null,
+        }),
+      });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const reader = res.body.getReader(), dec = new TextDecoder();
+      let buf = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += dec.decode(value, { stream: true });
+        const frames = buf.split("\n\n"); buf = frames.pop();
+        for (const frame of frames) {
+          let evt = "message", data = "";
+          for (const ln of frame.split("\n")) {
+            if (ln.startsWith("event:")) evt = ln.slice(6).trim();
+            else if (ln.startsWith("data:")) data += ln.slice(5).trim();
+          }
+          if (!data) continue;
+          let p; try { p = JSON.parse(data); } catch { continue; }
+          if (evt === "status") {
+            bubble.innerHTML = `<div class="typing"><span></span><span></span><span></span></div>`;
+          } else if (evt === "muhaqqiq") {
+            bubble.innerHTML = renderMuhaqqiqCard(p.mode, p.data);
+            scrollChat();
+          }
+        }
+      }
+    } catch(err) {
+      bubble.innerHTML = `<p>Connection error: ${esc(err.message)}</p>`;
+    } finally {
+      state.streaming = false;
+      $("#sendBtn").disabled = !ta.value.trim();
+    }
+    return;
+  }
+
+  // --- Ustad streaming path ---
+  const bubble = addBotSlot("Ustad");
   let text = "", srcsShown = false;
 
   try {
     const res = await fetch(`${API}/chat/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: q, history: state.history.slice(-8, -1) }),
+      body: JSON.stringify({ question: q, history: state.history.slice(-8, -1), agent: "ustad" }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -335,7 +385,7 @@ async function loadSourcesAndStats() {
 
 async function loadSources() {
   try {
-    const res = await fetch(`${API}/sources`);
+    const res = await fetch(`${API}/sources?t=${Date.now()}`);
     const d = await res.json();
     const sources = d.sources || [];
 
@@ -360,6 +410,12 @@ async function loadSources() {
 
     // chat sidebar
     syncSidebar(sources);
+
+    // quiz file picker
+    syncQuizPicker(sources);
+
+    // muhaqqiq source select
+    syncMuhaqqiqSources(sources);
   } catch { /* silent */ }
 }
 
@@ -380,7 +436,7 @@ function syncSidebar(sources) {
 
 async function loadStats() {
   try {
-    const res = await fetch(`${API}/health`);
+    const res = await fetch(`${API}/health?t=${Date.now()}`);
     const d = await res.json();
 
     const chunks = d.chunks || 0, sources = d.sources || 0;
@@ -432,22 +488,24 @@ $("#retakeQuiz")?.addEventListener("click", () => { resetQuiz(); $("#quizSetup")
 async function startQuiz() {
   const topic = $("#quizTopic")?.value.trim();
   if (!topic) { toast("Enter a topic first", "err"); return; }
-  
+
+  const sourceFilter = $("#quizFileSelect")?.value || null;
+
   const btn = $("#startQuiz");
   btn.disabled = true; btn.querySelector("span").textContent = "Generating…";
-  
+
   try {
     const res = await fetch("/api/quiz/start", {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ topic, difficulty: "auto" })
+      body: JSON.stringify({ topic, difficulty: "auto", source_filter: sourceFilter })
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.detail || "Failed to start quiz");
-    
+
     quizState.sessionId = data.session_id;
     quizState.currentQ = 1;
     quizState.totalQ = data.total_questions;
-    
+
     $("#qaTopic").textContent = data.topic;
     showQuestion(data.first_question);
     $("#quizSetup").style.display = "none";
@@ -467,7 +525,10 @@ function showQuestion(q) {
   $("#qaFeedback").style.display = "none";
   $("#qaFeedback").className = "qa-feedback";
   $("#nextQuestion").style.display = "none";
-  $("#submitAnswer").style.display = "";
+  const btn = $("#submitAnswer");
+  btn.style.display = "";
+  btn.disabled = false;
+  btn.querySelector("span").textContent = "Submit answer";
   $("#qaAnswer").focus();
   quizState.pendingEval = null;
 }
@@ -491,10 +552,12 @@ async function submitQuizAnswer() {
     quizState.pendingEval = data;
     btn.style.display = "none";
     
+    const nq = $("#nextQuestion");
+    nq.style.display = "";
     if (data.is_last) {
-      setTimeout(() => showReport(data.report), 1200);
+      nq.querySelector("span").textContent = "Finish Quiz & View Results →";
     } else {
-      $("#nextQuestion").style.display = "";
+      nq.querySelector("span").textContent = "Next question →";
     }
   } catch(err) {
     toast(`Error: ${err.message}`, "err");
@@ -521,6 +584,10 @@ function showEvaluation(ev) {
 
 function showNextQuestion() {
   const data = quizState.pendingEval;
+  if (data?.is_last) {
+    showReport(data.report);
+    return;
+  }
   if (!data?.next_question) return;
   quizState.currentQ = data.next_question_num;
   showQuestion(data.next_question);
@@ -549,4 +616,205 @@ function resetQuiz() {
   $("#quizSetup").style.display = "";
   $("#quizActive").style.display = "none";
   $("#quizReport").style.display = "none";
+}
+
+/* ═══ QUIZ FILE PICKER ═════════════════════════════════════ */
+function syncQuizPicker(sources) {
+  const noFile = $("#qsNoFile");
+  const form = $("#qsForm");
+  const picker = $("#qsFilePicker");
+  const sel = $("#quizFileSelect");
+
+  if (!sources || sources.length === 0) {
+    // No files — show no-file state
+    if (noFile) noFile.style.display = "";
+    if (form) form.style.display = "none";
+    return;
+  }
+
+  // 1 or more files — show form
+  if (noFile) noFile.style.display = "none";
+  if (form) form.style.display = "";
+
+  if (sources.length >= 2) {
+    // Show the file picker dropdown
+    if (picker) picker.style.display = "";
+    if (sel) {
+      sel.innerHTML = '<option value="">— All uploaded notes —</option>';
+      sources.forEach(s => {
+        const opt = document.createElement("option");
+        opt.value = s.name;
+        opt.textContent = s.name;
+        sel.appendChild(opt);
+      });
+    }
+  } else {
+    // Exactly 1 file — hide picker
+    if (picker) picker.style.display = "none";
+  }
+}
+
+/* ═══ MUHAQQIQ SOURCE SELECT ══════════════════════════════ */
+function syncMuhaqqiqSources(sources) {
+  const sel = $("#mqSourceSelect");
+  if (!sel) return;
+  sel.innerHTML = '<option value="">— pick a paper —</option>';
+  (sources || []).forEach(s => {
+    const opt = document.createElement("option");
+    opt.value = s.name;
+    opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
+}
+
+/* ═══ AGENT SELECTOR ══════════════════════════════════════ */
+$$(".agent-pill").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.agent = btn.dataset.agent;
+    $$(".agent-pill").forEach(b => b.classList.toggle("active", b === btn));
+    const mqBar = $("#muhaqqiqBar");
+    const ta = $("#question");
+    if (state.agent === "muhaqqiq") {
+      mqBar.style.display = "";
+      ta.placeholder = "Ask a claim to cross-examine, or just press Analyze Paper above…";
+    } else {
+      mqBar.style.display = "none";
+      ta.placeholder = "Ask anything from your notes…";
+    }
+  });
+});
+
+$("#mqSourceSelect")?.addEventListener("change", e => {
+  state.muhaqqiqSource = e.target.value;
+});
+
+$$(".mq-mode-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    state.muhaqqiqMode = btn.dataset.mode;
+    $$(".mq-mode-btn").forEach(b => b.classList.toggle("active", b === btn));
+    const ta = $("#question");
+    if (state.muhaqqiqMode === "analyze") {
+      ta.placeholder = "Press send to analyze the selected paper…";
+    } else if (state.muhaqqiqMode === "cross_examine") {
+      ta.placeholder = "Enter a claim or hypothesis to cross-examine against the paper…";
+    } else if (state.muhaqqiqMode === "synthesize") {
+      ta.placeholder = "Press send to synthesize and compare all uploaded papers…";
+    }
+  });
+});
+
+/* ═══ MUHAQQIQ CARD RENDERER ══════════════════════════════ */
+function renderMuhaqqiqCard(mode, data) {
+  if (data.error) {
+    return `<div class="mq-card mq-error"><strong>⚠️ Error:</strong> ${esc(data.error)}</div>`;
+  }
+
+  if (mode === "analyze") {
+    const m = data.paper_meta || {};
+    const delta = data.the_delta || {};
+    const intuition = data.core_intuition || {};
+    const evidence = data.evidence_anchor || {};
+    const blind = data.blindspots_and_critique || {};
+    return `
+      <div class="mq-card">
+        <div class="mq-card-header">
+          <span class="mq-badge">🔍 Analysis</span>
+          <span class="mq-type">${esc(m.estimated_contribution_type || "")}</span>
+        </div>
+        <div class="mq-thesis">${esc(m.core_thesis_one_sentence || "")}</div>
+        <div class="mq-section">
+          <div class="mq-section-title">⚡ The Delta</div>
+          <div class="mq-section-body">
+            <strong>Previous limitations:</strong>
+            <ul>${(delta.previous_limitations || []).map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+            <strong>Novel fix:</strong> ${esc(delta.the_novel_fix || "")}
+          </div>
+        </div>
+        <div class="mq-section">
+          <div class="mq-section-title">🧠 Core Intuition</div>
+          <div class="mq-section-body">
+            <p><em>${esc(intuition.simplified_analogy || "")}</em></p>
+            <p>${esc(intuition.technical_engine || "")}</p>
+          </div>
+        </div>
+        <div class="mq-section">
+          <div class="mq-section-title">📊 Evidence</div>
+          <div class="mq-section-body">
+            <ul>${(evidence.key_experiments_or_proofs || []).map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+            <strong>⭐ Standout result:</strong> ${esc(evidence.strongest_metric_or_finding || "")}
+          </div>
+        </div>
+        <div class="mq-section mq-blindspot">
+          <div class="mq-section-title">🕳️ Blindspots</div>
+          <div class="mq-section-body">
+            <strong>Stated by authors:</strong>
+            <ul>${(blind.explicit_limitations || []).map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+            <strong>Hidden trade-offs:</strong>
+            <ul>${(blind.hidden_compromises || []).map(p => `<li>${esc(p)}</li>`).join("")}</ul>
+          </div>
+        </div>
+      </div>`;
+  }
+
+  if (mode === "cross_examine") {
+    const verdictColors = { SUPPORTED: "mq-supported", INFERRED: "mq-inferred", CONTRADICTED: "mq-contradicted", UNADDRESSED: "mq-unaddressed" };
+    const v = data.verdict || "UNADDRESSED";
+    return `
+      <div class="mq-card">
+        <div class="mq-card-header">
+          <span class="mq-badge">⚖️ Cross-Examination</span>
+          <span class="mq-verdict ${verdictColors[v] || ""}">${esc(v)}</span>
+          <span class="mq-confidence">Confidence: ${((data.confidence_score || 0) * 100).toFixed(0)}%</span>
+        </div>
+        <div class="mq-section">
+          <div class="mq-section-title">Verdict explanation</div>
+          <div class="mq-section-body">${esc(data.verdict_explanation || "")}</div>
+        </div>
+        <div class="mq-section">
+          <div class="mq-section-title">📎 Exact quotes from paper</div>
+          <div class="mq-section-body">
+            ${(data.exact_evidence_quotes || []).map(q => `<blockquote class="mq-quote">${esc(q)}</blockquote>`).join("")}
+          </div>
+        </div>
+        <div class="mq-section">
+          <div class="mq-section-title">🔄 Counter-arguments</div>
+          <div class="mq-section-body">${esc(data.counter_arguments_found || "None found.")}</div>
+        </div>
+      </div>`;
+  }
+
+  if (mode === "synthesize") {
+    const matrix = data.comparative_matrix || [];
+    const alignments = data.structural_alignments || [];
+    const divs = data.divergences_and_contradictions || [];
+    const gaps = data.unresolved_research_gaps || [];
+    return `
+      <div class="mq-card">
+        <div class="mq-card-header"><span class="mq-badge">🧬 Synthesis</span></div>
+        <div class="mq-thesis">${esc(data.synthesis_overview || "")}</div>
+        <div class="mq-section">
+          <div class="mq-section-title">📊 Comparative Matrix</div>
+          <div class="mq-section-body">
+            <table class="mq-table">
+              <thead><tr><th>Paper</th><th>Methodology</th><th>Advantage</th><th>Drawback</th></tr></thead>
+              <tbody>${matrix.map(r => `<tr><td>${esc(r.paper_title||"?")}</td><td>${esc(r.core_methodology||"?")}</td><td>${esc(r.primary_advantage||"?")}</td><td>${esc(r.primary_drawback||"?")}</td></tr>`).join("")}</tbody>
+            </table>
+          </div>
+        </div>
+        <div class="mq-section">
+          <div class="mq-section-title">🤝 Alignments</div>
+          <div class="mq-section-body">${alignments.map(a => `<p><strong>${esc(a.shared_concept||"")}:</strong> ${esc(a.supporting_evidence||"")}</p>`).join("")}</div>
+        </div>
+        <div class="mq-section">
+          <div class="mq-section-title">⚡ Contradictions</div>
+          <div class="mq-section-body">${divs.map(d => `<p><strong>${esc(d.point_of_contention||"")}:</strong><br>A: ${esc(d.paper_a_stance||"")} | B: ${esc(d.paper_b_stance||"")}</p>`).join("")}</div>
+        </div>
+        <div class="mq-section mq-blindspot">
+          <div class="mq-section-title">🕳️ Unresolved Gaps</div>
+          <div class="mq-section-body"><ul>${gaps.map(g => `<li>${esc(g)}</li>`).join("")}</ul></div>
+        </div>
+      </div>`;
+  }
+
+  return `<div class="mq-card">${esc(JSON.stringify(data, null, 2))}</div>`;
 }

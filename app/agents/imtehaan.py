@@ -39,6 +39,8 @@ Partially correct = partial (tell them what they missed).
 Wrong = explain why and guide them toward the right answer.
 Never just say "wrong" — always teach.
 
+IMPORTANT: Write your evaluation feedback strictly in English, unless the student answered in Urdu.
+
 Respond ONLY with this JSON:
 {{
   "is_correct": true/false/"partial",
@@ -68,7 +70,10 @@ async def start_quiz(topic: str, chunks: List[Dict]) -> Dict:
     
     try:
         resp = await chain.ainvoke({"topic": topic, "chunks_text": chunks_text})
-        text = re.sub(r'^```(?:json)?\s*|\s*```$', '', resp.content.strip(), flags=re.MULTILINE).strip()
+        content = resp.content
+        if isinstance(content, list):
+            content = "".join(b.get("text", "") if isinstance(b, dict) else str(b) for b in content)
+        text = re.sub(r'^```(?:json)?\s*|\s*```$', '', content.strip(), flags=re.MULTILINE).strip()
         data = json.loads(text)
         questions = data["questions"]
     except Exception as e:
@@ -122,7 +127,10 @@ async def evaluate_answer(session_id: str, question_num: int, answer: str) -> Di
             "model_answer": question.get('model_answer', 'See expected concepts'),
             "student_answer": answer
         })
-        text = re.sub(r'^```(?:json)?\s*|\s*```$', '', resp.content.strip(), flags=re.MULTILINE).strip()
+        content = resp.content
+        if isinstance(content, list):
+            content = "".join(b.get("text", "") if isinstance(b, dict) else str(b) for b in content)
+        text = re.sub(r'^```(?:json)?\s*|\s*```$', '', content.strip(), flags=re.MULTILINE).strip()
         evaluation = json.loads(text)
     except Exception:
         evaluation = {
@@ -161,11 +169,14 @@ def _format_question(q: Dict) -> Dict:
         "hard": "[Hard]",
         "extreme": "[Extreme]"
     }
+    level = q.get("level", "medium")
+    if isinstance(level, str):
+        level = level.lower()
     return {
-        "num": q["num"],
-        "level": q["level"],
-        "question": q["question"],
-        "level_label": level_labels.get(q["level"], "[Question]")
+        "num": q.get("num", 1),
+        "level": level,
+        "question": q.get("question", "[Missing Question]"),
+        "level_label": level_labels.get(level, "[Question]")
     }
 
 def _generate_report(session: Dict) -> Dict:

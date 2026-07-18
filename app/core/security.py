@@ -75,7 +75,7 @@ def assert_upload_safe(files: list, content_lengths: list[int] | None = None) ->
             )
 
 
-async def assert_file_size_ok(file_bytes: bytes) -> None:
+def assert_file_size_ok(file_bytes: bytes) -> None:
     """Check the actual byte length of a single uploaded file."""
     if len(file_bytes) > settings.max_upload_bytes:
         raise HTTPException(
