@@ -1,139 +1,298 @@
-# Deployment Guide
+# 🚀 Fikaryaar Deployment Guide
 
-This guide walks you through running **RAG Study Chatbot** locally, then
-deploying it for free (Render), and the honest trade-offs of each option.
-
----
-
-## 0. Prerequisites
-
-- A Google Gemini API key (free) → https://aistudio.google.com/app/apikey
-- Python 3.11 or 3.12 (3.13/3.14 may lack some wheels)
-- [`uv`](https://docs.astral.sh/uv/) installed
-- Git + a GitHub account (for deployment)
+Deploy your RAG study chatbot for **free** on multiple platforms. This guide covers the three best free-tier options.
 
 ---
 
-## 1. Run locally
+## 📋 Prerequisites
 
+1. **GitHub account** — for code hosting & CI/CD
+2. **Groq API key** — free at [console.groq.com](https://console.groq.com/keys)
+3. **Docker Hub / GHCR** — for container images (free)
+
+---
+
+## 🎯 Quick Comparison
+
+| Platform | Free Tier | Sleep? | Best For |
+|----------|-----------|--------|----------|
+| **Render** | 750 hrs/mo, 512 MB RAM | After 15 min idle | **Primary recommendation** — simplest |
+| **Fly.io** | 3 shared-cpu VMs, 160 GB transfer | Never | Docker-native, always-on |
+| **Railway** | 500 hrs/mo, $5 credit/mo | Never | Alternative with generous credit |
+
+---
+
+## 🏆 Option 1: Render (Recommended)
+
+### 1. Push to GitHub
 ```bash
-# 1. Install uv if you don't have it
-pip install uv
-
-# 2. Create the venv + install deps (uv handles Python version too)
-uv venv --python 3.11
-uv pip install -r requirements.txt      # or: uv sync (uses pyproject.toml)
-
-# 3. Configure secrets
-copy .env.example .env                  # Windows
-# cp .env.example .env                  # macOS/Linux
-#   -> open .env and paste your GOOGLE_API_KEY
-
-# 4. (Optional) drop a couple of PDFs/DOCX/MD files into /pdf
-
-# 5. Run
-uv run uvicorn app.main:app --reload
-#   open http://localhost:8000
+git init
+git add .
+git commit -m "Initial commit"
+git branch -M main
+git remote add origin https://github.com/YOUR_USERNAME/fikaryaar.git
+git push -u origin main
 ```
 
-The first run downloads the embeddings model (~90 MB) and ingests everything
-in `/pdf`. Subsequent boots are fast.
+### 2. Create Render Web Service
+1. Go to [dashboard.render.com](https://dashboard.render.com)
+2. **New** → **Web Service** → Connect your GitHub repo
+3. Settings:
+   - **Name**: `fikaryaar`
+   - **Region**: Oregon (US West) or closest
+   - **Branch**: `main`
+   - **Runtime**: `Docker`
+   - **Dockerfile Path**: `./Dockerfile`
+   - **Plan**: `Free`
+
+### 3. Add Environment Variables
+In Render dashboard → **Environment** tab, add:
+```
+GROQ_API_KEY=gsk_your_groq_key_here
+GROQ_MODEL=llama-3.1-8b-instant
+KEEP_ALIVE_ENABLED=true
+KEEP_ALIVE_URL=https://fikaryaar.onrender.com
+```
+> **Note**: `KEEP_ALIVE_URL` prevents the free tier from sleeping. Render pings itself every 10 min.
+
+### 4. Add Persistent Disk (for Chroma DB)
+1. In service settings → **Disks** → **Add Disk**
+2. Name: `chroma-data`
+3. Mount Path: `/app/data/chroma_db`
+4. Size: `1 GB` (free tier limit)
+
+### 5. Deploy
+Click **Create Web Service**. First deploy takes 5-10 min (downloads embeddings model).
+
+### 6. Verify
+- Health: `https://fikaryaar.onrender.com/api/health`
+- App: `https://fikaryaar.onrender.com`
 
 ---
 
-## 2. Deploy to Render (free tier) — recommended
+## ✈️ Option 2: Fly.io (Always-On, Docker-Native)
 
-Render runs Docker images and gives a free web service. Steps:
+### 1. Install Fly CLI
+```bash
+# Windows (PowerShell)
+iwr https://fly.io/install.ps1 -useb | iex
 
-1. **Push the project to GitHub.**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin <your-repo-url>
-   git push -u origin main
-   ```
+# macOS
+brew install flyctl
 
-2. **On Render:**
-   - Dashboard → **New** → **Blueprint**
-   - Pick your GitHub repo. Render reads `render.yaml`.
-   - Under **Environment**, set the secret `GOOGLE_API_KEY` (paste your key).
-   - Click **Apply**. Build takes ~5–8 min (it pre-downloads the model).
+# Linux
+curl -L https://fly.io/install.sh | sh
+```
 
-3. **Open the deployed URL.** Done — you now have a public StudyBuddy.
+### 2. Login & Launch
+```bash
+fly auth login
+fly launch --name fikaryaar --region ord --dockerfile Dockerfile
+```
+- Choose **No** for PostgreSQL, Redis
+- Select **Free** plan (shared-cpu-1x, 256 MB)
 
-### Free-tier limits (be aware)
+### 3. Set Secrets
+```bash
+fly secrets set GROQ_API_KEY=gsk_your_key_here
+fly secrets set GROQ_MODEL=llama-3.1-8b-instant
+```
 
-| Limit | Effect |
-|---|---|
-| Service **sleeps after ~15 min** idle | First request after sleep takes ~30–50 s to wake |
-| **Ephemeral filesystem** | Uploaded user notes are **wiped on restart/deploy** |
-| 750 free hours/month, then sleep | Fine for personal study use |
+### 4. Configure Volume (for Chroma persistence)
+```bash
+fly volumes create chroma_data --region ord --size 1
+```
+Edit `fly.toml`:
+```toml
+[mounts]
+source = "chroma_data"
+destination = "/app/data/chroma_db"
+```
 
-**Mitigations already built in:**
-- On every boot the app **re-ingests `/pdf`**, so the bundled knowledge base
-  always comes back automatically.
-- Set `KEEP_ALIVE_ENABLED=true` (already set in render.yaml) so the app pings
-  itself every 10 min and stays warm.
+### 5. Deploy
+```bash
+fly deploy
+```
 
-### Keep user uploads permanently (optional, ~$1/mo)
-
-Attach a **Disk** (Render's persistent volume):
-
-1. Upgrade the service to a **Starter** plan ($7/mo — required for disks).
-2. In the service settings, add a **Disk**:
-   - Name: `studybot-data`
-   - Mount path: `/app/data`
-   - Size: 1 GB
-3. Also move `/pdf` onto the disk if you want bundled notes to be editable
-   without redeploying.
-
-After this, user uploads in `data/uploads` survive restarts.
-
----
-
-## 3. Alternative free hosts
-
-| Host | Notes |
-|---|---|
-| **Fly.io** | Free allowance, supports Docker + persistent volumes. Use `Dockerfile`. `fly deploy`. |
-| **Railway** | Free trial credits, then $5/mo. Reads `Dockerfile` directly. |
-| **Koyeb** | Free tier, Docker support. |
-| **Hugging Face Spaces** | Free, but file system is ephemeral; good for demos. |
-
-The Dockerfile in this repo works on any of them. Only the env vars differ.
-
-> **Vercel note:** Vercel only hosts static/serverless frontends and has a
-> 10-second function timeout — not suitable for a heavy Python RAG backend
-> with local model inference. Use Render/Fly instead, as chosen.
+### 6. Verify
+```bash
+fly open
+# or visit https://fikaryaar.fly.dev
+```
 
 ---
 
-## 4. Production hardening checklist
+## 🚂 Option 3: Railway
 
-Before sharing publicly, review:
+### 1. Connect Repo
+1. Go to [railway.app](https://railway.app)
+2. **New Project** → **Deploy from GitHub repo**
+3. Select your repo
 
-- [x] `GOOGLE_API_KEY` is a Render **secret**, never in git.
-- [x] Upload endpoint validates file types + sizes + magic bytes.
-- [x] Study-only guardrail (intent classify → refuse off-topic).
-- [x] Model is instructed (system prompt) to refuse outside scope.
-- [x] CORS locked to known origins.
-- [ ] Consider a rate limiter (e.g. `slowapi`) if abuse is observed.
-- [ ] Rotate the API key if it leaks.
+### 2. Configure
+- **Dockerfile**: Auto-detected
+- **Port**: `8000`
+- **Healthcheck**: `/api/health`
+
+### 3. Variables
+Add in **Variables** tab:
+```
+GROQ_API_KEY=gsk_xxx
+GROQ_MODEL=llama-3.1-8b-instant
+```
+
+### 4. Add Volume
+1. **New** → **Volume**
+2. Mount path: `/app/data/chroma_db`
+
+### 5. Deploy
+Auto-deploys on push to main.
 
 ---
 
-## 5. Troubleshooting
+## 🔄 CI/CD with GitHub Actions
 
-**"API key missing" in the UI** → set `GOOGLE_API_KEY` in Render env and redeploy.
+The `.github/workflows/ci-cd.yml` handles:
+1. **Lint & Test** on every push/PR
+2. **Build & Push** Docker image to GHCR on merge to main
+3. **Auto-deploy** to Render/Fly/Railway (configure secrets)
 
-**First answer is slow (30+ s)** → embeddings model is still downloading, or
-the service just woke from sleep. Subsequent answers are fast.
+### Required GitHub Secrets
+Go to **Settings** → **Secrets and variables** → **Actions** → **New repository secret**:
 
-**"No relevant notes found"** → you haven't uploaded anything and `/pdf` is
-empty. Upload notes via the UI or drop files in `/pdf` and redeploy.
+| Secret | Description |
+|--------|-------------|
+| `RENDER_DEPLOY_HOOK` | From Render: Settings → Deploy Hook |
+| `FLY_API_TOKEN` | `fly tokens create deploy` |
+| `FLY_APP_NAME` | Your Fly app name (e.g., `fikaryaar`) |
 
-**Out of memory on Render free (512 MB)** → the MiniLM embeddings + Chroma
-fit comfortably; if you switch to a bigger embeddings model you may need a
-paid plan with more RAM.
+---
+
+## 🐳 Local Docker Development
+
+### Build & Run
+```bash
+# Build
+docker compose build
+
+# Run with .env
+docker compose --env-file .env up -d
+
+# View logs
+docker compose logs -f app
+
+# Stop
+docker compose down
+```
+
+### .env File (create from example)
+```bash
+cp .env.example .env
+# Edit .env with your GROQ_API_KEY
+```
+
+---
+
+## 📦 Manual Docker Deploy (Any VPS)
+
+```bash
+# On your server
+docker pull ghcr.io/yourusername/fikaryaar:latest
+
+docker run -d \
+  --name fikaryaar \
+  -p 8000:8000 \
+  -e GROQ_API_KEY=gsk_xxx \
+  -e GROQ_MODEL=llama-3.1-8b-instant \
+  -v /path/to/chroma:/app/data/chroma_db \
+  -v /path/to/uploads:/app/data/uploads \
+  -v /path/to/pdf:/app/pdf:ro \
+  --restart unless-stopped \
+  ghcr.io/yourusername/fikaryaar:latest
+```
+
+Add nginx reverse proxy + SSL (Let's Encrypt) for production.
+
+---
+
+## 🔧 Troubleshooting
+
+### "Embeddings model download fails"
+- First run downloads ~90 MB model. Allow 60-120s on cold start.
+- Pre-warm: `docker run --rm ghcr.io/... python -c "from app.rag.embeddings import get_embeddings; get_embeddings()"`
+
+### "Chroma DB locked / permission denied"
+- Ensure volume mounts have correct ownership: `chown -R 1000:1000 /data/chroma_db`
+- In Dockerfile, user is `appuser` (UID 1000)
+
+### "Out of memory on free tier"
+- Reduce `TOP_K` to 3-4
+- Reduce `RETRIEVAL_CANDIDATE_K` to 10
+- Use smaller embedding model: `sentence-transformers/all-MiniLM-L6-v2` (already default)
+
+### "Groq rate limit / 429"
+- Free tier: 30 RPM, 6000 TPM
+- App uses fallback to Gemini if `GEMINI_API_KEY` also set
+- Consider `llama-3.1-8b-instant` (fastest, highest limits)
+
+---
+
+## 📊 Monitoring
+
+| Platform | Logs | Metrics |
+|----------|------|---------|
+| Render | Dashboard → Logs | Built-in CPU/RAM |
+| Fly.io | `fly logs` | `fly dashboard` |
+| Railway | Dashboard → Deployments | Built-in |
+
+Health endpoint: `GET /api/health` returns:
+```json
+{
+  "status": "ok",
+  "version": "1.0.0",
+  "chunks": 1347,
+  "sources": 1,
+  "llm_configured": true,
+  "embeddings_loaded": true
+}
+```
+
+---
+
+## 💰 Cost Summary (Free Tier)
+
+| Resource | Render | Fly.io | Railway |
+|----------|--------|--------|---------|
+| Compute | 750 hrs/mo | 3 VMs × 24/7 | 500 hrs/mo + $5 credit |
+| RAM | 512 MB | 256 MB / VM | 512 MB |
+| Storage | 1 GB disk | 1 GB volume | 1 GB |
+| Bandwidth | 100 GB/mo | 160 GB/mo | Included |
+| Custom Domain | ✅ Free | ✅ Free | ✅ Free |
+| SSL | ✅ Auto | ✅ Auto | ✅ Auto |
+
+---
+
+## ✅ Post-Deploy Checklist
+
+- [ ] Health check returns `status: "ok"`
+- [ ] Frontend loads at root URL
+- [ ] Upload a PDF → appears in Knowledge Base panel
+- [ ] Ask a question → gets cited answer
+- [ ] Streaming works (tokens appear progressively)
+- [ ] Sources panel shows clickable citations
+- [ ] Quiz feature generates questions
+- [ ] Custom domain configured (optional)
+
+---
+
+## 📝 Notes
+
+- **Embeddings model** downloads on first run (~90 MB). Subsequent starts are instant.
+- **Chroma DB** persists in volume. Survives restarts/redeploys.
+- **Groq free tier** is generous. No credit card needed.
+- **Keep-alive** (Render) prevents cold starts but uses hours. Disable if not needed: `KEEP_ALIVE_ENABLED=false`
+- **Multiple agents**: Ustad (notes Q&A), Muhaqqiq (research), Imtehaan (quiz), Darban (gatekeeper), Mehakkim (grader)
+
+---
+
+**Happy deploying!** 🎓✨
