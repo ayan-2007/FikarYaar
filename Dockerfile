@@ -1,40 +1,37 @@
-# Dockerfile for RAG Study Chatbot
-# Multi-stage not needed; image is small enough and we want the model cache
-# to survive container restarts when a volume is mounted.
-
-FROM python:3.11-slim
-
-# ---- System deps for pdfplumber / pypdf / docx ----
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    libxml2 \
-    libxslt1.1 \
-    poppler-utils \
-    && rm -rf /var/lib/apt/lists/*
-
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    HF_HOME=/app/.cache/huggingface
+# ---- Build stage ----
+FROM python:3.11-slim AS builder
 
 WORKDIR /app
 
-# Install Python deps first (better layer caching)
-COPY requirements.txt .
-RUN pip install --upgrade pip && pip install -r requirements.txt
+# Install uv for fast pip
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-# Copy app code + static + bundled notes
-COPY app/        ./app/
-COPY static/     ./static/
-COPY pdf/        ./pdf/
-COPY data/       ./data/
+# Copy dependency files
+COPY pyproject.toml uv.lock* ./
 
-# Pre-download the embeddings model at build time so the first boot is fast
-# and works even offline. Comment out if it makes your build too slow.
-RUN python -c "from app.rag.embeddings import get_embeddings; get_embeddings()" || echo "model prefetch skipped"
+# Install dependencies to /app/.venv
+RUN uv sync --frozen --no-dev
 
+# ---- Runtime stage ----
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copy virtual env from builder
+COPY --from=builder /app/.venv /app/.venv
+
+# Copy application code
+COPY . .
+
+# Create non-root user
+RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Use venv python
+ENV PATH="/app/.venv/bin:$PATH"
+
+# Expose port
 EXPOSE 8000
 
-# uvicorn with a single worker (the model is heavy; scale horizontally instead)
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
+# Run with gunicorn for production
+CMD ["gunicorn", "app.main:app", "--workers", "1", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000", "--timeout", "120"]
