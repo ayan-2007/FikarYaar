@@ -34,7 +34,11 @@ source-cited answers. Frontend = premium "Fikryar" learning platform UI.
 - `static/css/styles.css` — design system: burnt-orange palette, glassmorphism, dark theme, animations (orb breath/spin, particle glow, typer, ring progress)
 - `static/js/app.js` — view router, canvas particle bg (neural lines), hero typer, SSE streaming chat, uploads, sources/health polling, WebAudio ambient sound + chimes, local growth stats
 
-## How to run
+### ✅ Auto-ingestion verified
+- Startup auto-ingests `pdf/tony_gaddis_c++.pdf` → 1347 chunks indexed
+- Health endpoint confirms: chunks=1347, sources=1, LLM configured=true
+
+## How to run (local)
 ```cmd
 :: 1. put your Groq key in .env  (GROQ_API_KEY=gsk_...)
 :: 2. start server
@@ -66,3 +70,12 @@ source-cited answers. Frontend = premium "Fikryar" learning platform UI.
 - Embeddings model (~90MB) downloads on first run — cached after.
 - The `langchain-google-genai` package is still in the venv (harmless leftover); Groq is what's used.
 - `TOP_K=5` → now only **1** grading call instead of 5.
+- Default notes dir is `pdf/` (copied from uploaded `data/uploads/`).
+
+## Free Deployment Targets
+| Platform | URL | Free Tier Limits | Best For |
+|----------|-----|------------------|----------|
+| **Render** | render.com | 750 hrs/mo, 512MB RAM, auto-sleep after 15min idle | Primary recommendation |
+| **Railway** | railway.app | 500 hrs/mo, $5 credit/mo, no sleep | Alternative |
+| **Fly.io** | fly.io | 3 shared-cpu-1x VMs free, 160GB monthly transfer | Docker-based |
+| **Hugging Face Spaces** | huggingface.co/spaces | CPU basic, sleeps after 48h | ML-focused, Gradio/Streamlit native |
