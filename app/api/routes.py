@@ -137,18 +137,25 @@ async def _stream_muhaqqiq(question: str, mode: str, source_filter: str | None):
     """
     Run Muhaqqiq in the requested mode and emit a single structured SSE event.
     """
-    from app.rag.vectorstore import retrieve_with_threshold, get_vectorstore
+    from app.rag.vectorstore import retrieve_with_threshold, get_vectorstore, list_sources, collection_count
     from app.agents.muhaqqiq import analyze_paper, cross_examine_claim, synthesize_multiple_papers
 
     yield "event: status\ndata: " + json.dumps({"step": "analyzing"}) + "\n\n"
     await asyncio.sleep(0)
+
+    if collection_count() == 0:
+        yield "event: muhaqqiq\ndata: " + json.dumps({
+            "mode": mode,
+            "data": {"error": "Your knowledge base is empty! Please upload study notes or research papers first."}
+        }) + "\n\n"
+        yield "event: done\ndata: " + json.dumps({}) + "\n\n"
+        return
 
     # Build where-filter for Chroma if a source is selected
     where = {"source_name": source_filter} if source_filter else None
 
     try:
         if mode == "analyze":
-            # Pull a broad set of chunks from the selected paper
             vs = get_vectorstore()
             raw = vs._collection.get(
                 where=where,
@@ -159,25 +166,25 @@ async def _stream_muhaqqiq(question: str, mode: str, source_filter: str | None):
                 {"source": (m or {}).get("source_name", "paper"), "text": t, "metadata": m or {}}
                 for t, m in zip(raw.get("documents", []), raw.get("metadatas", []))
             ]
-            result = await analyze_paper(chunks)
+            if not chunks:
+                result = {"error": f"No text chunks found for selected paper '{source_filter or 'all'}'. Please upload notes first."}
+            else:
+                result = await analyze_paper(chunks)
             yield "event: muhaqqiq\ndata: " + json.dumps({"mode": "analyze", "data": result}) + "\n\n"
 
         elif mode == "cross_examine":
-            # Retrieve relevant chunks for the claim
             scored = retrieve_with_threshold(
-                question, candidate_k=12, final_k=8,
+                question or "main thesis and claims", candidate_k=12, final_k=8,
             )
             chunks = [
                 {"source": doc.metadata.get("source_name", "paper"), "text": doc.page_content, "metadata": doc.metadata}
                 for doc, _ in scored
                 if not source_filter or doc.metadata.get("source_name") == source_filter
             ]
-            result = await cross_examine_claim(question, chunks)
+            result = await cross_examine_claim(question or "Analyze core claims", chunks)
             yield "event: muhaqqiq\ndata: " + json.dumps({"mode": "cross_examine", "data": result}) + "\n\n"
 
         elif mode == "synthesize":
-            # Group chunks per source and synthesize across all uploaded papers
-            from app.rag.vectorstore import list_sources
             sources = list_sources()
             papers_data = []
             vs = get_vectorstore()
@@ -187,14 +194,18 @@ async def _stream_muhaqqiq(question: str, mode: str, source_filter: str | None):
                     include=["documents", "metadatas"],
                     limit=8,
                 )
-                papers_data.append({
-                    "title": src["name"],
-                    "chunks": [
-                        {"text": t, "metadata": m or {}}
-                        for t, m in zip(raw.get("documents", []), raw.get("metadatas", []))
-                    ]
-                })
-            result = await synthesize_multiple_papers(papers_data)
+                if raw.get("documents"):
+                    papers_data.append({
+                        "title": src["name"],
+                        "chunks": [
+                            {"text": t, "metadata": m or {}}
+                            for t, m in zip(raw.get("documents", []), raw.get("metadatas", []))
+                        ]
+                    })
+            if not papers_data:
+                result = {"error": "No uploaded sources available for synthesis. Please upload study notes first."}
+            else:
+                result = await synthesize_multiple_papers(papers_data)
             yield "event: muhaqqiq\ndata: " + json.dumps({"mode": "synthesize", "data": result}) + "\n\n"
 
         else:
@@ -204,6 +215,7 @@ async def _stream_muhaqqiq(question: str, mode: str, source_filter: str | None):
         yield "event: muhaqqiq\ndata: " + json.dumps({"mode": mode, "data": {"error": str(e)}}) + "\n\n"
 
     yield "event: done\ndata: " + json.dumps({}) + "\n\n"
+
 
 
 

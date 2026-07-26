@@ -62,17 +62,17 @@ def assert_upload_safe(files: list, content_lengths: list[int] | None = None) ->
                 detail=f"File type not allowed: {name}. "
                 f"Allowed: {', '.join(sorted(ALLOWED_EXTENSIONS))}.",
             )
-        # FastAPI exposes the size on the UploadFile after we read it; we also
-        # accept an explicit size list (read from the multipart header).
-    if content_lengths:
-        for size in content_lengths:
+        size = getattr(f, "size", None)
+        if size is not None:
             total += size
-        if total > settings.max_upload_bytes:
-            raise HTTPException(
-                status_code=413,
-                detail=f"Total upload too large. Maximum is "
-                f"{settings.max_upload_bytes // (1024 * 1024)} MB.",
-            )
+        elif content_lengths:
+            total += content_lengths.pop(0)
+    if total > settings.max_upload_bytes:
+        raise HTTPException(
+            status_code=413,
+            detail=f"Total upload too large. Maximum is "
+            f"{settings.max_upload_bytes // (1024 * 1024)} MB.",
+        )
 
 
 def assert_file_size_ok(file_bytes: bytes) -> None:
