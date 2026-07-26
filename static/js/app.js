@@ -122,7 +122,7 @@ kbBackdrop.addEventListener("click", closeKB);
 })();
 
 /* ═══ MARKDOWN ═════════════════════════════════════════════ */
-function esc(s) { return s.replace(/&/g,"&").replace(/</g,"<").replace(/>/g,">"); }
+function esc(s) { return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 
 function md(text) {
   let h = esc(text);
@@ -183,12 +183,16 @@ function attachSources(bubble, sources) {
 
 function scrollChat() { const c = $("#chat"); c.scrollTop = c.scrollHeight; }
 
-/* ═══ CHAT: SUBMIT ═════════════════════════════════════════ */
+function updateSendButtonState() {
+  const isMqActionable = state.agent === "muhaqqiq" && (state.muhaqqiqMode === "analyze" || state.muhaqqiqMode === "synthesize");
+  $("#sendBtn").disabled = !ta.value.trim() && !isMqActionable;
+}
+
 const ta = $("#question");
 ta.addEventListener("input", () => {
   ta.style.height = "auto";
   ta.style.height = Math.min(ta.scrollHeight, 160) + "px";
-  $("#sendBtn").disabled = !ta.value.trim();
+  updateSendButtonState();
   const len = ta.value.length;
   const hint = $("#charHint");
   hint.textContent = len > 200 ? `${len}` : "";
@@ -199,7 +203,16 @@ ta.addEventListener("keydown", e => {
 
 $("#composer").addEventListener("submit", async e => {
   e.preventDefault();
-  const q = ta.value.trim();
+  let q = ta.value.trim();
+  
+  if (state.agent === "muhaqqiq") {
+    if (!q) {
+      if (state.muhaqqiqMode === "analyze") q = "Analyze paper structure, delta, and critique";
+      else if (state.muhaqqiqMode === "synthesize") q = "Synthesize and compare all uploaded papers";
+      else if (state.muhaqqiqMode === "cross_examine") q = "Cross-examine core claims in document";
+    }
+  }
+
   if (!q || state.streaming) return;
 
   addUserMsg(q);
@@ -676,11 +689,12 @@ $$(".agent-pill").forEach(btn => {
     const ta = $("#question");
     if (state.agent === "muhaqqiq") {
       mqBar.style.display = "";
-      ta.placeholder = "Ask a claim to cross-examine, or just press Analyze Paper above…";
+      ta.placeholder = "Ask a claim to cross-examine, or just press Send to analyze/synthesize…";
     } else {
       mqBar.style.display = "none";
       ta.placeholder = "Ask anything from your notes…";
     }
+    updateSendButtonState();
   });
 });
 
@@ -694,12 +708,13 @@ $$(".mq-mode-btn").forEach(btn => {
     $$(".mq-mode-btn").forEach(b => b.classList.toggle("active", b === btn));
     const ta = $("#question");
     if (state.muhaqqiqMode === "analyze") {
-      ta.placeholder = "Press send to analyze the selected paper…";
+      ta.placeholder = "Press Send to analyze paper architecture & findings…";
     } else if (state.muhaqqiqMode === "cross_examine") {
       ta.placeholder = "Enter a claim or hypothesis to cross-examine against the paper…";
     } else if (state.muhaqqiqMode === "synthesize") {
-      ta.placeholder = "Press send to synthesize and compare all uploaded papers…";
+      ta.placeholder = "Press Send to synthesize and compare all uploaded papers…";
     }
+    updateSendButtonState();
   });
 });
 
