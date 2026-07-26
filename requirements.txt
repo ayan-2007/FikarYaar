@@ -32,3 +32,4 @@ langchain-chroma>=0.1.4
 langchain-huggingface>=0.1.0
 
 loguru>=0.7
+gunicorn>=22.0

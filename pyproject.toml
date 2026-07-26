@@ -39,6 +39,7 @@ dependencies = [
     "langchain-huggingface>=0.1.0",
     # --- Observability ---
     "loguru>=0.7",
+    "gunicorn>=22.0",
 ]
 
 [project.optional-dependencies]

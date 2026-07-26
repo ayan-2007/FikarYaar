@@ -51,7 +51,8 @@ In Render dashboard → **Environment** tab, add:
 GROQ_API_KEY=gsk_your_groq_key_here
 GROQ_MODEL=llama-3.1-8b-instant
 KEEP_ALIVE_ENABLED=true
-KEEP_ALIVE_URL=https://fikaryaar.onrender.com
+KEEP_ALIVE_URL=
+
 ```
 > **Note**: `KEEP_ALIVE_URL` prevents the free tier from sleeping. Render pings itself every 10 min.
 
