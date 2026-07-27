@@ -29,24 +29,39 @@ git push -u origin main
 2. Sign in with **GitHub** — no credit card asked
 3. Click **Deploy from GitHub**
 
-#### 3. Connect your repo
-1. Select `ayan-2007/FikarYaar`
-2. SnapDeploy auto-detects:
-   - **Framework**: Python/FastAPI
-   - **Dockerfile**: detected
-   - **Port**: 8000 (auto-set)
+#### 3. Configure your container
+Fill in the form:
 
-#### 4. Add Environment Variables
+| Field | Value |
+|-------|-------|
+| **Container Name** | `fikaryaar` |
+| **Repository** | `ayan-2007/FikarYaar` |
+| **Branch** | `main` |
+| **Description** (optional) | `self-oriented RAG study assistant via notes` |
+
+Your app URL will be: `https://fikaryaar-XXXX.containers.snapdeploy.app`
+
+#### 4. Advanced Options
+Click **Advanced Options** and set:
+
+**Compute Type:** `CPU` (free with auto-sleep)
+
+**Container Size:** `Small` (512 MB / 0.25 vCPU — free)
+
+**Environment Variables:**
+
 | Key | Value |
 |-----|-------|
 | `GROQ_API_KEY` | `gsk_your_key_here` |
 | `GROQ_MODEL` | `llama-3.1-8b-instant` |
 
+**Auto Deploy on Push:** ✅ Toggle ON
+
 #### 5. Deploy
 Click **Deploy**. First build takes 3-5 minutes (installs deps, downloads ~90 MB embedding model, builds Docker image).
 
 #### 6. Open
-`https://fikaryaar.snapdeploy.app`
+`https://fikaryaar-XXXX.containers.snapdeploy.app`
 
 > **⚠️ Free containers auto-sleep when idle.** Auto-wakes on traffic (10-30s). The app auto-rebuilds its Chroma vector DB from bundled PDFs in `pdf/` on every cold start (`app/main.py:83-94`), so no persistent disk is needed.
 
@@ -70,7 +85,7 @@ Click **Deploy**. First build takes 3-5 minutes (installs deps, downloads ~90 MB
 ---
 
 ## ✅ Post-Deploy Checklist
-- [ ] `https://fikaryaar.onrender.com/api/health` returns `{"status": "ok"}`
+- [ ] `https://fikaryaar-XXXX.containers.snapdeploy.app/api/health` returns `{"status": "ok"}`
 - [ ] Frontend loads at root URL
 - [ ] Upload a PDF → appears in Knowledge Base panel
 - [ ] Ask a question → cited answer streams in progressively
