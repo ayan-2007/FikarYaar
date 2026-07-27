@@ -64,17 +64,25 @@ def get_llm(temperature: float = 0.2, streaming: bool = False, max_tokens: int =
         ))
 
     if HAS_GROQ and groq_key and groq_key != "your_groq_api_key_here":
+        groq_keys = [groq_key]
+        for i in range(2, 5):
+            extra = os.getenv(f"GROQ_API_KEY_{i}", "")
+            if extra and extra != groq_key and extra not in groq_keys:
+                groq_keys.append(extra)
+
         model_name = settings.groq_model or "llama-3.1-8b-instant"
-        log.info(f"Adding Groq Chat Model: {model_name} (temp={temperature}, streaming={streaming})")
-        models.append(ChatGroq(
-            model=model_name,
-            api_key=groq_key,
-            temperature=temperature,
-            max_tokens=max_tokens,
-            timeout=30,
-            max_retries=1,
-            streaming=streaming,
-        ))
+        for i, key in enumerate(groq_keys):
+            label = "primary" if i == 0 else f"fallback-{i}"
+            log.info(f"Adding Groq Chat Model [{label}]: {model_name}")
+            models.append(ChatGroq(
+                model=model_name,
+                api_key=key,
+                temperature=temperature,
+                max_tokens=max_tokens,
+                timeout=30,
+                max_retries=1,
+                streaming=streaming,
+            ))
 
     if not models:
         raise ValueError(
