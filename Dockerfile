@@ -2,16 +2,25 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Copy source + config
-COPY pyproject.toml README.md ./
+# Install system deps needed for some wheels
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends gcc && \
+    rm -rf /var/lib/apt/lists/*
 
-# Install project + all deps (prefer-binary skips native compilation)
-RUN pip install --no-cache-dir --prefer-binary .
+# Copy dependency file only (skips building the project wheel entirely)
+COPY pyproject.toml ./
 
-# Copy the rest of the app
+# Extract and install deps directly — no wheel build, no hatchling
+RUN python3 -c "
+import tomllib, subprocess
+with open('pyproject.toml', 'rb') as f:
+    deps = tomllib.load(f)['project']['dependencies']
+subprocess.check_call(['pip', 'install', '--no-cache-dir', '--prefer-binary', *deps])
+"
+
+# Copy application code
 COPY . .
 
-# Create non-root user
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser
 
