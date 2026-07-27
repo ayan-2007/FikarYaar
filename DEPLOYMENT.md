@@ -3,6 +3,8 @@
 | Platform | Free Tier | No Card? | Best For |
 |----------|-----------|----------|----------|
 | **SnapDeploy** | 10 deploys/day, 512 MB RAM, auto-wake | ✅ Yes | **Primary — Docker-native, no card** |
+| **Koyeb** | 1 service, 512 MB RAM, always-on | ✅ Yes | Always-on, Docker native |
+| **Railway** | $5 trial credit, 8 GB RAM | ✅ Yes | Powerful hardware, credits eventually run out |
 | **FastAPI Cloud** | Hobby plan, 3000 req/mo | ✅ Yes | Built by FastAPI team, serverless |
 
 ---
