@@ -65,7 +65,7 @@ def get_llm(temperature: float = 0.2, streaming: bool = False, max_tokens: int =
 
     if HAS_GROQ and groq_key and groq_key != "your_groq_api_key_here":
         groq_keys = [groq_key]
-        for i in range(2, 5):
+        for i in range(2, 11):
             extra = os.getenv(f"GROQ_API_KEY_{i}", "")
             if extra and extra != groq_key and extra not in groq_keys:
                 groq_keys.append(extra)

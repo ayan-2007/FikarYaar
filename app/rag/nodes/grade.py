@@ -4,6 +4,7 @@ Node: grade retrieved documents using Agent 2 (Mehakkim).
 from __future__ import annotations
 
 from app.core.logging import get_logger
+from app.core.counter import limit_reached, increment, remaining, MAX_OFFTOPIC
 from app.agents.mehakkim import validate as mehakkim_validate
 from app.rag.state import GraphState
 
@@ -16,7 +17,16 @@ async def grade_documents_node(state: GraphState) -> dict:
     scores = state.get("retrieval_scores", {})
 
     if not docs:
-        log.info("No documents retrieved — triggering fallback")
+        if limit_reached():
+            return {
+                "documents": [],
+                "used_notes": False,
+                "sources": [],
+                "answer": f"You've used {MAX_OFFTOPIC} outside-notes questions. Please upload relevant notes to continue."
+            }
+        inc = increment()
+        left = remaining()
+        log.info(f"No documents retrieved — fallback {inc}/{MAX_OFFTOPIC}")
         return {
             "documents": [],
             "used_notes": False,
@@ -45,6 +55,18 @@ async def grade_documents_node(state: GraphState) -> dict:
         }
 
     fallback_needed = res.get("fallback_needed", False) or not res.get("retrieval_valid", False)
+
+    if fallback_needed and limit_reached():
+        return {
+            "documents": [],
+            "used_notes": False,
+            "sources": [],
+            "answer": f"You've used {MAX_OFFTOPIC} outside-notes questions. Please upload relevant notes to continue."
+        }
+    if fallback_needed:
+        inc = increment()
+        left = remaining()
+        log.info(f"Mehakkim says fallback — using general knowledge ({inc}/{MAX_OFFTOPIC})")
 
     # Format sources for UI if retrieval is valid
     sources = []
