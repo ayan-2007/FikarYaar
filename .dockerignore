@@ -12,10 +12,9 @@ logs
 .env.*
 node_modules
 tests
-README.md
-DEPLOYMENT.md
 *.md
-!pdf/README.md
+!README.md
+!DEPLOYMENT.md
 Dockerfile
 .dockerignore
 render.yaml
