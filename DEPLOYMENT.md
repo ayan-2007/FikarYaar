@@ -2,18 +2,19 @@
 
 | Platform | Free Tier | No Card? | Best For |
 |----------|-----------|----------|----------|
-| **Render** | 750 hrs/mo, 512 MB RAM, 0.1 CPU | ✅ Yes | **Primary — Docker auto-detected** |
-| **SnapDeploy** | 4 containers, 512 MB RAM each | ✅ Yes | Docker-native, full control |
+| **SnapDeploy** | 10 deploys/day, 512 MB RAM, auto-wake | ✅ Yes | **Primary — Docker-native, no card** |
+| **FastAPI Cloud** | Hobby plan, 3000 req/mo | ✅ Yes | Built by FastAPI team, serverless |
 
 ---
 
-## 🏆 Option 1: Render (Recommended)
+## 🏆 Option 1: SnapDeploy (Recommended)
 
-### Why Render?
-- **No credit card required** — sign up with GitHub/Google/GitLab
-- Auto-detects your `Dockerfile` — just connect repo
-- Auto-deploys on every commit to `main`
-- Auto HTTPS, custom domains, health checks
+### Why SnapDeploy?
+- **No credit card required** — sign up with GitHub
+- Docker-native — your `Dockerfile` works as-is
+- Auto-detects Python/FastAPI and port 8000
+- Auto-deploys from GitHub on every push
+- Free tier: 10 deploys/day, auto-sleep/wake
 
 ### Step-by-Step
 
@@ -23,50 +24,41 @@ git remote add origin https://github.com/ayan-2007/FikarYaar.git
 git push -u origin main
 ```
 
-#### 2. Create Render Web Service
-1. Go to [dashboard.render.com](https://dashboard.render.com)
-2. **New** → **Web Service** → Connect your `ayan-2007/FikarYaar` repo
-3. Render auto-fills because it detects your `Dockerfile`:
+#### 2. Create account on SnapDeploy
+1. Go to [snapdeploy.dev](https://snapdeploy.dev)
+2. Sign in with **GitHub** — no credit card asked
+3. Click **Deploy from GitHub**
 
-| Field | Value |
-|-------|-------|
-| **Name** | `FikarYaar` |
-| **Language** | `Docker` (auto-detected) |
-| **Branch** | `main` |
-| **Region** | `Oregon (US West)` |
-| **Instance Type** | **Free** ($0/mo, 512 MB RAM, 0.1 CPU) |
-| **Health Check Path** | `/api/health` |
-| **Docker Build Context** | `.` (root, default) |
-| **Dockerfile Path** | `./Dockerfile` (default) |
-| **Auto-Deploy** | `On Commit` (default) |
+#### 3. Connect your repo
+1. Select `ayan-2007/FikarYaar`
+2. SnapDeploy auto-detects:
+   - **Framework**: Python/FastAPI
+   - **Dockerfile**: detected
+   - **Port**: 8000 (auto-set)
 
-#### 3. Add Environment Variables
-Scroll down to **Environment Variables** and add:
-
+#### 4. Add Environment Variables
 | Key | Value |
 |-----|-------|
 | `GROQ_API_KEY` | `gsk_your_key_here` |
 | `GROQ_MODEL` | `llama-3.1-8b-instant` |
 
-#### 4. Deploy
-Click **Deploy Web Service** at the bottom.
+#### 5. Deploy
+Click **Deploy**. First build takes 3-5 minutes (installs deps, downloads ~90 MB embedding model, builds Docker image).
 
-First build takes 3-5 minutes (installs Python deps, downloads ~90 MB embedding model, builds Docker image). Subsequent builds use cache and are faster.
+#### 6. Open
+`https://fikaryaar.snapdeploy.app`
 
-#### 5. Open
-`https://fikaryaar.onrender.com`
-
-> **⚠️ Free tier spins down after 15 min of inactivity.** Cold start ~30s. The app auto-rebuilds its Chroma vector DB from the bundled PDFs in `pdf/` on every cold start (`app/main.py:83-94`), so no persistent disk is needed.
+> **⚠️ Free containers auto-sleep when idle.** Auto-wakes on traffic (10-30s). The app auto-rebuilds its Chroma vector DB from bundled PDFs in `pdf/` on every cold start (`app/main.py:83-94`), so no persistent disk is needed.
 
 ---
 
-## ⚡ Option 2: SnapDeploy (Docker-Native)
+## ⚡ Option 2: FastAPI Cloud
 
-1. Create account at [snapdeploy.dev](https://snapdeploy.dev) — no card
-2. Connect GitHub repo
-3. It auto-detects Dockerfile, sets port 8000
-4. Add `GROQ_API_KEY` as env secret
-5. Deploy — container auto-sleeps when idle, wakes on traffic
+1. Go to [fastapicloud.com](https://fastapicloud.com)
+2. Sign up — **no credit card** (Hobby plan)
+3. Connect your GitHub repo
+4. Set `GROQ_API_KEY` and `GROQ_MODEL` as env vars
+5. Deploy — serverless, pay-per-request, 3000 free requests/mo
 
 ---
 
