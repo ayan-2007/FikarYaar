@@ -18,6 +18,7 @@ dependencies = [
     "pydantic-settings>=2.3",
     "python-dotenv>=1.0",
     # --- Document parsing ---
+    "pypdf>=4.3",
     "python-docx>=1.1",
     "python-pptx>=0.6",
     "markdown>=3.6",
