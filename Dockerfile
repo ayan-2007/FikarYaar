@@ -6,8 +6,8 @@ WORKDIR /app
 # Install uv for fast pip
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /bin/uv
 
-# Copy dependency files
-COPY pyproject.toml uv.lock* ./
+# Copy dependency files + readme (hatchling validates it exists)
+COPY pyproject.toml uv.lock* README.md ./
 
 # Install dependencies to /app/.venv
 RUN uv sync --frozen --no-dev
