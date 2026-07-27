@@ -2,16 +2,14 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system deps needed for building some Python packages
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc && \
-    rm -rf /var/lib/apt/lists/*
-
-# Copy dependency files
+# Install only runtime Python dependencies (skips building the project wheel)
 COPY pyproject.toml README.md ./
-
-# Install project + deps (prefer-binary skips compiling native extensions)
-RUN pip install --no-cache-dir --prefer-binary .
+RUN pip install --no-cache-dir --prefer-binary $(python3 -c "
+import tomllib
+with open('pyproject.toml', 'rb') as f:
+    data = tomllib.load(f)
+    print(' '.join(data['project']['dependencies']))
+")
 
 # Copy application code
 COPY . .
