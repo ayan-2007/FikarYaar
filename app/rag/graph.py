@@ -32,8 +32,6 @@ def _route_after_classify(state: GraphState) -> Literal["retrieve", "refuse_offt
 
 
 def _route_after_grade(state: GraphState) -> Literal["generate"]:
-    # Always route to Ustad (generate) so no query goes unanswered.
-    # Ustad will print a warning and answer from general knowledge if fallback_needed is True.
     return "generate"
 
 

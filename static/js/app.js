@@ -3,7 +3,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const mk = (tag, cls) => { const e = document.createElement(tag); if (cls) e.className = cls; return e; };
 
-const state = { view: "home", history: [], streaming: false, agent: "ustad", muhaqqiqMode: "analyze", muhaqqiqSource: "" };
+const state = { view: "home", ustadHistory: [], muhaqqiqHistory: [], streaming: false, agent: "ustad", muhaqqiqMode: "analyze", muhaqqiqSource: "" };
 
 /* ═══ TOAST ════════════════════════════════════════════════ */
 let _toastT;
@@ -139,6 +139,36 @@ function md(text) {
 }
 
 /* ═══ CHAT: RENDER ═════════════════════════════════════════ */
+function renderCurrentChat() {
+  const container = $("#messages");
+  if (!container) return;
+  container.innerHTML = "";
+  const hist = state.agent === "muhaqqiq" ? state.muhaqqiqHistory : state.ustadHistory;
+  if (hist.length === 0) {
+    const w = $("#welcome");
+    if (w) w.style.display = "";
+    return;
+  }
+  const w = $("#welcome");
+  if (w) w.style.display = "none";
+  for (const msg of hist) {
+    const wrap = mk("div", `msg msg-${msg.role === "user" ? "user" : "bot"}`);
+    if (msg.role === "user") {
+      const bubble = mk("div", "bubble");
+      bubble.innerHTML = esc(msg.content).replace(/\n/g, "<br>");
+      wrap.append(bubble);
+    } else {
+      const header = mk("div", "bot-header");
+      header.innerHTML = `<span class="bot-name">${state.agent === "muhaqqiq" ? "Muhaqqiq" : "Ustad"}</span>`;
+      const bubble = mk("div", "bubble");
+      bubble.innerHTML = md(msg.content);
+      wrap.append(header, bubble);
+    }
+    container.append(wrap);
+  }
+  scrollChat();
+}
+
 function hideWelcome() { const w = $("#welcome"); if (w) w.style.display = "none"; }
 
 function addUserMsg(text) {
@@ -216,7 +246,8 @@ $("#composer").addEventListener("submit", async e => {
   if (!q || state.streaming) return;
 
   addUserMsg(q);
-  state.history.push({ role: "user", content: q });
+  const hist = state.agent === "muhaqqiq" ? state.muhaqqiqHistory : state.ustadHistory;
+  hist.push({ role: "user", content: q });
   ta.value = ""; ta.style.height = "auto"; $("#sendBtn").disabled = true;
   state.streaming = true;
 
@@ -275,7 +306,7 @@ $("#composer").addEventListener("submit", async e => {
     const res = await fetch(`${API}/chat/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ question: q, history: state.history.slice(-8, -1), agent: "ustad" }),
+      body: JSON.stringify({ question: q, history: state.ustadHistory.slice(-6, -1), agent: "ustad" }),
     });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
 
@@ -309,7 +340,7 @@ $("#composer").addEventListener("submit", async e => {
         }
       }
     }
-    state.history.push({ role: "assistant", content: text });
+    state.ustadHistory.push({ role: "assistant", content: text });
   } catch(err) {
     bubble.innerHTML = `<p>Connection error: ${esc(err.message)}. Is the server running?</p>`;
   } finally {
@@ -695,7 +726,18 @@ $$(".agent-pill").forEach(btn => {
       ta.placeholder = "Ask anything from your notes…";
     }
     updateSendButtonState();
+    renderCurrentChat();
   });
+});
+
+/* ═══ CLEAR CHAT ════════════════════════════════════════════ */
+$("#clearChat")?.addEventListener("click", () => {
+  if (state.agent === "muhaqqiq") {
+    state.muhaqqiqHistory = [];
+  } else {
+    state.ustadHistory = [];
+  }
+  renderCurrentChat();
 });
 
 $("#mqSourceSelect")?.addEventListener("change", e => {

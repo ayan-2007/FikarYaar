@@ -50,17 +50,20 @@ async def stream_answer(
     else:
         system = SYSTEM_GROUNDED
         context = "**Retrieved from your notes:**\n\n" + "\n\n---\n\n".join(
-            f"[Chunk {i+1} | {c['source']}]\n{c['text']}"
-            for i, c in enumerate(chunks[:6])
+            f"[Chunk {i+1} | {c['source']}]\n{c['text'][:600]}"
+            for i, c in enumerate(chunks[:4])
         )
     
-    # Build conversation history
+    # Build conversation history — only user questions, NOT assistant answers
+    # (prevents the model from anchoring on its own previous response style)
     history_text = ""
     if history:
-        history_text = "\n\n**Previous conversation:**\n" + "\n".join(
-            f"{'Student' if h['role'] == 'user' else 'Ustad'}: {h['content'][:300]}"
-            for h in history[-4:]
-        )
+        prev = [h for h in history if h["role"] == "user"]
+        if prev:
+            history_text = "\n\n**Previous topics discussed:**\n" + "\n".join(
+                f"- {h['content'][:200]}"
+                for h in prev[-3:]
+            )
     
     prompt = f"{context}{history_text}\n\n**Student's question:** {question}"
     
