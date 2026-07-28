@@ -12,7 +12,6 @@ from functools import lru_cache
 from pathlib import Path
 from typing import List
 
-from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Project root = the folder that contains this app/ package (two levels up).
@@ -65,10 +64,17 @@ class Settings(BaseSettings):
     # ---- Server ----
     app_host: str = "0.0.0.0"
     app_port: int = 8000
-    cors_origins: List[str] = [
-        "http://localhost:8000",
-        "http://127.0.0.1:8000",
-    ]
+    cors_origins: str = "http://localhost:8000,http://127.0.0.1:8000"
+
+    def cors_origins_list(self) -> List[str]:
+        v = self.cors_origins.strip()
+        if not v:
+            return ["*"]
+        if v.startswith("["):
+            import json
+
+            return json.loads(v)
+        return [origin.strip() for origin in v.split(",") if origin.strip()]
 
     # ---- Upload security ----
     max_upload_bytes: int = 15 * 1024 * 1024  # 15 MB
@@ -84,23 +90,6 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     # Validators / helpers that resolve relative paths against PROJECT_ROOT
     # ------------------------------------------------------------------
-    @field_validator("cors_origins", mode="wrap")
-    @classmethod
-    def _parse_cors(cls, v, handler):
-        if isinstance(v, str):
-            v = v.strip()
-            if not v:
-                return ["*"]
-            if v.startswith("["):
-                import json
-
-                try:
-                    return json.loads(v)
-                except json.JSONDecodeError:
-                    pass
-            return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return handler(v)
-
     def resolve(self, relative: str) -> Path:
         """Resolve a project-relative path to an absolute Path."""
         p = Path(relative)
