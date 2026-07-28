@@ -26,10 +26,9 @@ langchain-groq>=0.2
 langgraph>=0.2
 langgraph-checkpoint>=0.2
 
-sentence-transformers>=3.0
+fastembed>=0.3.0
 chromadb>=0.5
 langchain-chroma>=0.1.4
-langchain-huggingface>=0.1.0
 
 loguru>=0.7
 gunicorn>=22.0

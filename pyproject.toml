@@ -30,7 +30,7 @@ dependencies = [
     "langgraph>=0.2",
     # --- Embeddings + vector store ---
     "langchain-chroma>=0.1.4",
-    "langchain-huggingface>=0.1.0",
+    "fastembed>=0.3.0",
     # --- Observability ---
     "loguru>=0.7",
     "gunicorn>=22.0",
