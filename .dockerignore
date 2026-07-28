@@ -18,4 +18,7 @@ tests
 Dockerfile
 .dockerignore
 render.yaml
-.dockerignore
+uv.lock
+scripts/
+data/chroma_db/
+data/uploads/
