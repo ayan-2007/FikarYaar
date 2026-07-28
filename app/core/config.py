@@ -84,18 +84,22 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     # Validators / helpers that resolve relative paths against PROJECT_ROOT
     # ------------------------------------------------------------------
-    @field_validator("cors_origins", mode="before")
+    @field_validator("cors_origins", mode="wrap")
     @classmethod
-    def _parse_cors(cls, v):
-        # Allow either a JSON list or a comma-separated string in .env
+    def _parse_cors(cls, v, handler):
         if isinstance(v, str):
             v = v.strip()
+            if not v:
+                return ["*"]
             if v.startswith("["):
                 import json
 
-                return json.loads(v)
+                try:
+                    return json.loads(v)
+                except json.JSONDecodeError:
+                    pass
             return [origin.strip() for origin in v.split(",") if origin.strip()]
-        return v
+        return handler(v)
 
     def resolve(self, relative: str) -> Path:
         """Resolve a project-relative path to an absolute Path."""
