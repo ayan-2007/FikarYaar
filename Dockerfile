@@ -13,6 +13,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 COPY . .
+RUN rm -f .env .env.* 2>/dev/null || true
 
 RUN useradd -m -u 1000 appuser && chown -R appuser:appuser /app
 USER appuser

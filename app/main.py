@@ -39,7 +39,10 @@ app = FastAPI(
 # ---- CORS ---------------------------------------------------------------
 # Allow the configured origins (defaults to localhost). On Render we also allow
 # the service's own URL so the served frontend can call the API.
-origins = settings.cors_origins_list()
+try:
+    origins = settings.cors_origins_list()
+except Exception:
+    origins = ["*"]
 external = os.getenv("RENDER_EXTERNAL_URL")
 if external:
     origins.append(external)

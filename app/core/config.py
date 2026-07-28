@@ -73,7 +73,10 @@ class Settings(BaseSettings):
         if v.startswith("["):
             import json
 
-            return json.loads(v)
+            try:
+                return json.loads(v)
+            except json.JSONDecodeError:
+                pass
         return [origin.strip() for origin in v.split(",") if origin.strip()]
 
     # ---- Upload security ----
@@ -111,9 +114,13 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     """Cached settings singleton (constructed once per process)."""
-    s = Settings()
+    try:
+        s = Settings()
+    except Exception:
+        import os
 
-    # Detect common free-tier cloud providers so we can adapt behavior.
+        s = Settings(_env_file=None)
+
     import os
 
     s.is_cloud = any(
