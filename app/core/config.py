@@ -123,7 +123,13 @@ def get_settings() -> Settings:
 
     s.is_cloud = any(
         os.getenv(var)
-        for var in ("RENDER", "RENDER_EXTERNAL_URL", "DYNO", "RAILWAY_PROJECT_ID")
+        for var in (
+            "RENDER", "RENDER_EXTERNAL_URL",
+            "DYNO",
+            "RAILWAY_PROJECT_ID",
+            "SNAPDEPLOY_APP_URL",
+            "KOYEB_APP_URL",
+        )
     )
     return s
 

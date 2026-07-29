@@ -37,15 +37,22 @@ app = FastAPI(
 )
 
 # ---- CORS ---------------------------------------------------------------
-# Allow the configured origins (defaults to localhost). On Render we also allow
-# the service's own URL so the served frontend can call the API.
+# Allow the configured origins (defaults to localhost). On cloud platforms we
+# auto-detect the service URL so the frontend can call the API.
 try:
     origins = settings.cors_origins_list()
 except Exception:
     origins = ["*"]
-external = os.getenv("RENDER_EXTERNAL_URL")
-if external:
-    origins.append(external)
+
+external_url = (
+    os.getenv("RENDER_EXTERNAL_URL")
+    or os.getenv("SNAPDEPLOY_APP_URL")
+    or os.getenv("KOYEB_APP_URL")
+    or os.getenv("RAILWAY_PUBLIC_DOMAIN")
+)
+if external_url:
+    origins.append(external_url.rstrip("/"))
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins or ["*"],
@@ -96,11 +103,11 @@ async def _on_startup():
     except Exception as e:  # noqa: BLE001
         log.error(f"Startup ingestion failed: {e}")
 
-    # 3) optional keep-alive (anti-sleep for Render free tier)
-    if settings.keep_alive_enabled and (settings.keep_alive_url or external):
+    # 3) optional keep-alive (anti-sleep for free-tier cloud)
+    if settings.keep_alive_enabled and (settings.keep_alive_url or external_url):
         from app.core.keepalive import start_keep_alive
 
-        start_keep_alive(settings.keep_alive_url or external)
+        start_keep_alive(settings.keep_alive_url or external_url)
 
 
 # ---- Static frontend (served at /) --------------------------------------
@@ -111,6 +118,11 @@ if _static_dir.exists():
 else:
     log.warning("static/ directory missing — frontend will not be served")
 
+
+@app.get("/health")
+async def health_root():
+    """Root-level health check required by SnapDeploy."""
+    return {"status": "ok"}
 
 @app.get("/api")
 async def api_root():
