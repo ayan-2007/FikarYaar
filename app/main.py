@@ -61,6 +61,21 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# ---- Root-level routes (MUST be before static mount) --------------------
+@app.get("/health")
+async def health_root():
+    """Root-level health check required by SnapDeploy."""
+    return {"status": "ok"}
+
+@app.get("/api")
+async def api_root():
+    """Tiny landing for the API namespace."""
+    return {
+        "name": "RAG Study Chatbot API",
+        "docs": "/api/docs",
+        "endpoints": [r.path for r in app.routes],
+    }
+
 # ---- API routes ---------------------------------------------------------
 app.include_router(api_router)
 
@@ -110,25 +125,9 @@ async def _on_startup():
         start_keep_alive(settings.keep_alive_url or external_url)
 
 
-# ---- Static frontend (served at /) --------------------------------------
-# Mount this LAST so /api/* routes win over the catch-all.
+# ---- Static frontend (served at /) - MUST be LAST to avoid shadowing routes
 _static_dir = settings.resolve("static")
 if _static_dir.exists():
     app.mount("/", StaticFiles(directory=str(_static_dir), html=True), name="static")
 else:
     log.warning("static/ directory missing — frontend will not be served")
-
-
-@app.get("/health")
-async def health_root():
-    """Root-level health check required by SnapDeploy."""
-    return {"status": "ok"}
-
-@app.get("/api")
-async def api_root():
-    """Tiny landing for the API namespace."""
-    return {
-        "name": "RAG Study Chatbot API",
-        "docs": "/api/docs",
-        "endpoints": [r.path for r in app.routes],
-    }

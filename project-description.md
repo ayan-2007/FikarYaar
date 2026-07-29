@@ -73,11 +73,6 @@ python -m uvicorn app.main:app --reload --port 8000
 open http://localhost:8000
 ```
 
-## Deployment (100% Free — No Credit Card)
-See DEPLOYMENT.md for step-by-step guides to deploy on:
-- **Hugging Face Spaces** (Docker) — no card required, completely free
-- **Replit Deployments** — no card required
-- **PythonAnywhere** — no card required
 
 ## Requirements
 - Python 3.11+ (or Docker)
