@@ -80,7 +80,7 @@ async def api_root():
 app.include_router(api_router)
 
 
-# ---- Startup: warm up + auto-ingest ------------------------------------
+# ---- Startup: warm up + auto-ingest (SKIPPED on Vercel) ---------------
 @app.on_event("startup")
 async def _on_startup():
     """
@@ -89,7 +89,14 @@ async def _on_startup():
       2. If the vector DB is empty AND we have bundled notes, ingest them.
          This is what makes the app survive Render's ephemeral filesystem:
          the default knowledge base is always rebuilt on cold starts.
+
+    On Vercel (detected via VERCEL env var), we skip auto-ingest and
+    keep-alive — those don't make sense in serverless.
     """
+    import os
+
+    is_vercel = bool(os.getenv("VERCEL"))
+
     log.info("Starting RAG Study Chatbot...")
 
     # 1) warm up embeddings in a background thread (don't block startup)
@@ -104,22 +111,25 @@ async def _on_startup():
 
     asyncio.get_event_loop().run_in_executor(None, _warm)
 
-    # 2) auto-ingest bundled notes if store is empty
-    try:
-        from app.rag.ingest import ingest_notes_directory
-        from app.rag.vectorstore import collection_count
+    # 2) auto-ingest bundled notes if store is empty (skip on Vercel)
+    if not is_vercel:
+        try:
+            from app.rag.ingest import ingest_notes_directory
+            from app.rag.vectorstore import collection_count
 
-        if collection_count() == 0:
-            log.info("Vector store empty — ingesting bundled notes/")
-            added = ingest_notes_directory()
-            log.info(f"Auto-ingested {added} chunk(s) on startup")
-        else:
-            log.info("Vector store already populated — skipping auto-ingest")
-    except Exception as e:  # noqa: BLE001
-        log.error(f"Startup ingestion failed: {e}")
+            if collection_count() == 0:
+                log.info("Vector store empty — ingesting bundled notes/")
+                added = ingest_notes_directory()
+                log.info(f"Auto-ingested {added} chunk(s) on startup")
+            else:
+                log.info("Vector store already populated — skipping auto-ingest")
+        except Exception as e:  # noqa: BLE001
+            log.error(f"Startup ingestion failed: {e}")
+    else:
+        log.info("Vercel detected — skipping auto-ingest (use POST /api/ingest instead)")
 
-    # 3) optional keep-alive (anti-sleep for free-tier cloud)
-    if settings.keep_alive_enabled and (settings.keep_alive_url or external_url):
+    # 3) optional keep-alive (anti-sleep for free-tier cloud) — skip on Vercel
+    if not is_vercel and settings.keep_alive_enabled and (settings.keep_alive_url or external_url):
         from app.core.keepalive import start_keep_alive
 
         start_keep_alive(settings.keep_alive_url or external_url)
