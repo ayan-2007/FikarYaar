@@ -11,9 +11,10 @@ A production-ready, multi-agent RAG (Retrieval-Augmented Generation) platform fo
 5. **Mehakkim (Validator)** — Retrieval quality & coverage assessment.
 
 ## Tech Stack
-- **Backend:** Python 3.11, FastAPI, LangChain, LangGraph, Chroma Vector DB
+- **Backend:** Python 3.11, FastAPI, LangChain, LangGraph
+- **Vector DB:** Chroma (local) or Pinecone (cloud) — auto-switches via `VECTOR_STORE` env var
 - **LLM:** Groq (llama-3.1-8b-instant) via langchain-groq — fast, generous free tier
-- **Embeddings:** sentence-transformers/all-MiniLM-L6-v2 (local, ~90MB, no API key)
+- **Embeddings:** sentence-transformers/all-MiniLM-L6-v2 (local, ~90MB) or Google Generative AI embeddings API — auto-switches via `EMBEDDINGS_PROVIDER` env var
 - **Frontend:** Vanilla HTML5/CSS3/JS — no frameworks, no build step
 - **Design System:** Deep Obsidian (#080A10) & Flame Amber (#FF6B00) cyberpunk-academic theme, Glassmorphism, custom particle canvas engine
 - **Streaming:** Server-Sent Events (SSE) for real-time token output
@@ -29,14 +30,17 @@ A production-ready, multi-agent RAG (Retrieval-Augmented Generation) platform fo
 - Multi-document literature synthesis
 - Off-topic refusal & guardrails
 - Keep-alive mechanism for free-tier hosting
+- Dual deployment: Docker/single-server (Chroma + local embeddings) or Vercel serverless (Pinecone + Google embeddings)
 
 ## Project Structure
 ```
+├── api/
+│   └── index.py         # Vercel serverless entry point
 ├── app/
 │   ├── agents/         # Agent implementations (ustad, muhaqqiq, imtehaan, darban, mehakkim)
 │   ├── api/            # FastAPI routes (chat, quiz, upload, health)
-│   ├── core/           # Config, logging
-│   └── rag/            # Vector store, embeddings, ingestion, graph pipeline
+│   ├── core/           # Config, logging, keep-alive
+│   └── rag/            # Vector store (Chroma/Pinecone), embeddings, ingestion, graph pipeline
 ├── static/
 │   ├── index.html      # Single-page app shell
 │   ├── css/styles.css  # Full design system
@@ -45,12 +49,13 @@ A production-ready, multi-agent RAG (Retrieval-Augmented Generation) platform fo
 ├── data/               # Uploads & Chroma DB persistence
 ├── Dockerfile          # Multi-stage Docker build (uv + gunicorn)
 ├── docker-compose.yml  # Local dev with volumes
+├── vercel.json         # Vercel serverless config
 └── .github/            # CI/CD pipeline
 ```
 
 ## How It Works
 1. Upload notes via drag-and-drop or file picker
-2. Notes are chunked, embedded, and stored in Chroma vector DB
+2. Notes are chunked, embedded, and stored in a vector DB (Chroma locally, Pinecone on Vercel)
 3. Select an agent mode (Ustad/Muhaqqiq/Imtehaan)
 4. Ask questions — the agent retrieves relevant chunks, grounds its answer, and streams it back with citations
 5. For research papers: get structural analysis, cross-examine claims, synthesize multiple papers
@@ -72,6 +77,17 @@ python -m uvicorn app.main:app --reload --port 8000
 # 4. Open
 open http://localhost:8000
 ```
+
+## Vercel Deployment
+For serverless deployment, set these env vars in Vercel dashboard:
+```
+VECTOR_STORE=pinecone
+EMBEDDINGS_PROVIDER=google
+PINECONE_API_KEY=your_key
+GOOGLE_API_KEY=your_key
+GROQ_API_KEY=your_key
+```
+See `VERCEL_MIGRATION.md` for full details.
 
 
 ## Requirements
