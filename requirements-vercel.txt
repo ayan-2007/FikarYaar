@@ -1,0 +1,42 @@
+# requirements-vercel.txt — Vercel/serverless deployment
+# Swaps Chroma → Pinecone, local embeddings → Google AI embeddings
+# to stay within Vercel's 50MB function size limit.
+
+# --- Web framework ---
+fastapi>=0.111
+uvicorn[standard]>=0.30
+python-multipart>=0.0.9
+sse-starlette>=2.1
+
+# --- Config / utilities ---
+pydantic>=2.7
+pydantic-settings>=2.3
+python-dotenv>=1.0
+
+# --- Document parsing ---
+pypdf>=4.3
+pdfplumber>=0.11
+python-docx>=1.1
+python-pptx>=0.6
+markdown>=3.6
+
+# --- LangChain ecosystem ---
+langchain-core>=0.3
+langchain-community>=0.3
+langchain-text-splitters>=0.3
+langchain-groq>=0.2
+langgraph>=0.2
+langgraph-checkpoint>=0.2
+
+# --- Vector store (Pinecone cloud) ---
+pinecone-client>=5.0
+langchain-pinecone>=0.2
+
+# --- LLM APIs ---
+langchain-google-genai>=2.0
+
+# --- Tokenizer for chunking ---
+transformers>=4.40
+
+# --- Observability ---
+loguru>=0.7
