@@ -36,12 +36,19 @@ class Settings(BaseSettings):
     gemini_api_key: str = ""
     gemini_model: str = "gemini-3.1-flash-lite"
 
-    # ---- Embeddings (local sentence-transformers, free) ----
+    # ---- Embeddings (local or API-based) ----
+    embeddings_provider: str = "local"  # "local" | "google"
     embedding_model_name: str = "sentence-transformers/all-MiniLM-L6-v2"
+    google_api_key: str = ""  # for Google embeddings API (free tier: 100 req/s)
 
-    # ---- Vector store (Chroma, file-based) ----
+    # ---- Vector store (Chroma file-based or Pinecone cloud) ----
+    vector_store: str = "chroma"  # "chroma" | "pinecone"
     chroma_persist_dir: str = "data/chroma_db"
     chroma_collection_name: str = "study_notes"
+    pinecone_api_key: str = ""
+    pinecone_index_name: str = "fikaryaar"
+    pinecone_cloud: str = "aws"
+    pinecone_region: str = "us-east-1"
 
     # ---- Knowledge sources ----
     notes_dir: str = "pdf"
